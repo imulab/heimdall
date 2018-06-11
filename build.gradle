@@ -1,0 +1,58 @@
+plugins {
+    id 'application'
+    id 'java'
+    id "org.jetbrains.kotlin.jvm" version "1.2.41"
+    id 'com.github.johnrengelman.shadow' version '2.0.2'
+}
+
+repositories {
+    jcenter()
+}
+
+version = '1.0-SNAPSHOT'
+sourceCompatibility = '1.8'
+mainClassName = 'io.vertx.core.Launcher'
+
+def vertxVersion = '3.5.2'
+def kotlinVersion = '1.2.41'
+def junitVersion = '5.2.0'
+def assertJVersion = '3.10.0'
+def mainVerticleName = 'io.imulab.heimdall.ServerVerticle'
+def watchForChange = 'src/**/*'
+def doOnChange = './gradlew classes'
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+    compile "io.vertx:vertx-core:$vertxVersion"
+    testCompile "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testCompile "io.vertx:vertx-unit:$vertxVersion"
+    testCompile "io.vertx:vertx-junit5:$vertxVersion"
+    testCompile "org.assertj:assertj-core:$assertJVersion"
+}
+
+test {
+    useJUnitPlatform {
+        excludeTags 'slow'
+        includeEngines 'junit-jupiter', 'junit-vintage'
+    }
+    failFast = true
+}
+
+shadowJar {
+    classifier = 'fat'
+    manifest {
+        attributes "Main-Verticle": mainVerticleName
+    }
+    mergeServiceFiles {
+        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+    }
+}
+
+run {
+    args = ['run', mainVerticleName, "--redeploy=$watchForChange", "--launcher-class=$mainClassName", "--on-redeploy=$doOnChange"]
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.8'
+}
