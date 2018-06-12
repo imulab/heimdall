@@ -144,20 +144,31 @@ jobs:
 
   build_docker_image:
     docker:
-#      - image: circleci/openjdk:8-jdk
       - image: docker:18.05.0-ce
     working_directory: ~/repo
+    environment:
+      TERM: dumb
+      <<: *shared_env
     steps:
       - attach_workspace:
           at: /tmp/workspace
       - run:
+          name: Copy workspace file to working directory
           command: |
             cp /tmp/workspace/* ~/repo
       - setup_remote_docker
       - run:
+          name: Build docker image
           command: |
             ls -al .
-            docker image build .
+            docker image build -t imulab/heimdall:$APP_VERSION .
+      - run:
+          name: Upload docker image, if on master branch
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+              docker push imulab/heimdall:$APP_VERSION
+            fi
 
 workflows:
   version: 2
