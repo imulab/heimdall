@@ -107,7 +107,7 @@ jobs:
       - run:
           name: Build docker image
           command: |
-            docker build --no-cache -t imulab/heimdall:$APP_VERSION .
+            docker build -t imulab/heimdall:$APP_VERSION .
       - run:
           name: Upload docker image
           command: |
@@ -155,16 +155,28 @@ jobs:
               docker push imulab/heimdall:$APP_VERSION
             fi
 
+  debug:
+    docker:
+      - image: alpine:3.7
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          command: |
+            docker build .
+
 workflows:
   version: 2
   app_ci_pipeline:
     jobs:
-      - unitTest
-      - integrationTest
-      - build:
-          requires:
-            - unitTest
-            - integrationTest
-      - docker_image:
-          requires:
-            - build
+      - debug
+#      - unitTest
+#      - integrationTest
+#      - build:
+#          requires:
+#            - unitTest
+#            - integrationTest
+#      - docker_image:
+#          requires:
+#            - build
