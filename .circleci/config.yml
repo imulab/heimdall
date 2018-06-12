@@ -4,7 +4,7 @@
 #
 version: 2
 
-shared_environment: &shared_environment
+app_version_env: &app_version_env
   APP_VERSION: '0.0.1.SNAPSHOT'
 
 restore_gradle_cache: &restore_gradle_cache
@@ -83,7 +83,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
       TERM: dumb
-      *shared_environment
+      <<: *app_version_env
     steps:
       - checkout
       - *restore_gradle_cache
@@ -110,7 +110,7 @@ jobs:
       image: docker:18.05.0-ce
     working_directory: /app
     environment:
-      *shared_environment
+      <<: *app_version_env
     steps:
       - attach_workspace:
           at: /tmp/workspace
