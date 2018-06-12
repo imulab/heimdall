@@ -157,7 +157,7 @@ jobs:
 
   debug:
     docker:
-      - image: alpine:3.7
+      - image: circleci/openjdk:8-jdk
     working_directory: ~/repo
     steps:
       - checkout
