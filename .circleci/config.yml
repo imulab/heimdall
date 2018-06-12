@@ -147,15 +147,11 @@ jobs:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/repo
     steps:
-      - checkout
       - attach_workspace:
           at: /tmp/workspace
       - run:
           command: |
-            ls /tmp/workspace
             cp /tmp/workspace/* ~/repo
-#      - run:
-#          command: gradle shadowJar
       - setup_remote_docker
       - run:
           command: |
