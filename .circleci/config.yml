@@ -112,6 +112,7 @@ jobs:
     environment:
       <<: *shared_env
     steps:
+      - checkout
       - attach_workspace:
           at: /tmp/workspace
       - run:
