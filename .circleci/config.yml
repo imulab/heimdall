@@ -128,7 +128,7 @@ jobs:
       - run:
           name: Build docker image
           command: |
-            docker build -t imulab/heimdall:$APP_VERSION .
+            docker build -t imulab/heimdall:$APP_VERSION ~/repo
       - run:
           name: Upload docker image
           command: |
