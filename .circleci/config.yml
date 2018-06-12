@@ -113,13 +113,13 @@ jobs:
       <<: *shared_env
     steps:
       - checkout
+      - setup_remote_docker
       - attach_workspace:
           at: /tmp/workspace
       - run:
           name: Copy workspace jar
           command: |
             cp /tmp/workspace/heimdall.jar /app/heimdall.jar
-      - setup_remote_docker
       - run:
           name: Build docker image
           command: |
