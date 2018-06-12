@@ -120,7 +120,8 @@ jobs:
       - run:
           name: Copy workspace jar
           command: |
-            cp /tmp/workspace/heimdall.jar .
+            mkdir -p ~/repo/build/
+            cp /tmp/workspace/heimdall.jar ~/repo/build/
       - run:
           command: |
             ls -al .
