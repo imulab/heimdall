@@ -1,6 +1,6 @@
 FROM openjdk:8-jre-alpine3.7
 
-RUN ADD ./Dockerfile .
+ADD ./Dockerfile .
 RUN cat ./Dockerfile
 # ADD ./build/libs/heimdall-0.0.1-SNAPSHOT.jar .
 
