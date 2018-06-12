@@ -119,7 +119,7 @@ jobs:
       - run:
           name: Copy workspace jar
           command: |
-            cp /tmp/workspace/heimdall.jar .
+            cp /tmp/workspace/heimdall.jar ~/app/heimdall.jar
       - run:
           name: Build docker image
           command: |
