@@ -106,8 +106,9 @@ jobs:
   # Step 3: Build Image
   # ===================
   docker_image:
-    docker:
-      - image: docker:18.05.0-ce-git
+#    docker:
+#      - image: docker:18.05.0-ce-git
+    machine: true
     working_directory: ~/repo
     environment:
       TERM: dumb
