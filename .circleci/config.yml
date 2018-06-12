@@ -126,14 +126,15 @@ jobs:
       - run:
           name: Tag and upload docker image
           command: |
-            IMAGE_TAG = imulab/heimdall:latest
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              IMAGE_TAG = imulab/heimdall:$APP_VERSION
-            fi
-            echo $IMAGE_TAG
-            docker tag heimdall $IMAGE_TAG
             docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-            docker push $IMAGE_TAG
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              docker tag heimdall imulab/heimdall:$APP_VERSION
+              docker push imulab/heimdall:$APP_VERSION
+            else
+              docker tag heimdall imulab/heimdall:latest
+              docker push imulab/heimdall:latest
+            fi
+
 
 workflows:
   version: 2
