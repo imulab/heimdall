@@ -106,8 +106,9 @@ jobs:
   # Step 3: Build Image
   # ===================
   docker_image:
-    machine: true
-    working_directory: ~/app
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/repo
     environment:
       <<: *shared_env
     steps:
@@ -118,6 +119,7 @@ jobs:
           name: Copy workspace jar
           command: |
             cp /tmp/workspace/heimdall.jar .
+      - setup_remote_docker
       - run:
           command: |
             ls -al .
