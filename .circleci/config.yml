@@ -92,14 +92,16 @@ jobs:
       - *save_gradle_cache
       - run:
           command: |
-            mkdir -p ~/jars/
-            find . -type f -regex ".*/build/libs/heimdall-$APP_VERSION.jar" -exec cp {} ~/jars/heimdall.jar \;
+            mkdir -p ~/artifacts/
+            find . -type f -regex ".*/build/libs/heimdall-$APP_VERSION.jar" -exec cp {} ~/artifacts/heimdall.jar \;
+            cp Dockerfile ~/artifacts
       - store_artifacts:
-          path: ~/jars
+          path: ~/artifacts
       - persist_to_workspace:
-          root: ~/jars/
+          root: ~/artifacts/
           paths:
             - heimdall.jar
+            - Dockerfile
 
 
   # ===================
@@ -109,7 +111,7 @@ jobs:
 #    docker:
 #      - image: docker:18.05.0-ce-git
     machine: true
-    working_directory: ~/repo
+#    working_directory: ~/repo
     environment:
       TERM: dumb
       <<: *shared_env
@@ -117,18 +119,18 @@ jobs:
       - checkout
       - attach_workspace:
           at: /tmp/workspace
+#      - run:
+#          name: Copy workspace jar
+#          command: |
+#            mkdir -p ~/repo/build/
+#            cp /tmp/workspace/heimdall.jar ~/repo/build/
       - run:
-          name: Copy workspace jar
           command: |
-            mkdir -p ~/repo/build/
-            cp /tmp/workspace/heimdall.jar ~/repo/build/
-      - run:
-          command: |
-            ls -al .
+            ls -al /tmp/workspace
       - run:
           name: Build docker image
           command: |
-            docker build -t imulab/heimdall:$APP_VERSION -f ~/repo/Dockerfile /tmp/workspace
+            docker build -t imulab/heimdall:$APP_VERSION /tmp/workspace
       - run:
           name: Upload docker image
           command: |
