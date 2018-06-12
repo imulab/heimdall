@@ -126,8 +126,8 @@ jobs:
 #            cp /tmp/workspace/heimdall.jar ~/repo/build/
       - run:
           command: |
-            chown root:root /tmp/workspace/Dockerfile
-            chown root:root /tmp/workspace/heimdall.jar
+            sudo chown root:root /tmp/workspace/Dockerfile
+            sudo chown root:root /tmp/workspace/heimdall.jar
             ls -al /tmp/workspace
       - run:
           name: Build docker image
