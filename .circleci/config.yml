@@ -146,4 +146,4 @@ workflows:
             - integrationTest
       - build_docker_image:
           requires:
-            - build
+            - build_app_jar
