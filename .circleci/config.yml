@@ -142,9 +142,10 @@ jobs:
               docker push imulab/heimdall:$APP_VERSION
             fi
 
-  debug:
+  build_docker_image:
     docker:
-      - image: circleci/openjdk:8-jdk
+#      - image: circleci/openjdk:8-jdk
+      - image: docker:18.05.0-ce
     working_directory: ~/repo
     steps:
       - attach_workspace:
@@ -163,7 +164,7 @@ workflows:
   app_ci_pipeline:
     jobs:
       - build
-      - debug:
+      - build_docker_image:
           requires:
             - build
 #      - unitTest
