@@ -128,11 +128,13 @@ jobs:
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               IMAGE_TAG = imulab/heimdall:$APP_VERSION
+              echo $IMAGE_TAG
             else
               IMAGE_TAG = imulab/heimdall:latest
+              echo $IMAGE_TAG
             fi
             docker tag heimdall $IMAGE_TAG
-            echo "image tagged with $IMAGE_TAG"
+            echo $IMAGE_TAG
       - run:
           name: Upload docker image
           command: |
