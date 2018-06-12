@@ -4,31 +4,21 @@
 #
 version: 2
 jobs:
-  build:
+  # ===========================
+  # Stage 1: Cache dependencies
+  # ===========================
+  cache:
     docker:
-      # specify the version you desire here
       - image: circleci/openjdk:8-jdk
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
     working_directory: ~/repo
-
     environment:
-      # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
       TERM: dumb
-
     steps:
       - checkout
-
-      # Download and cache dependencies
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "build.gradle" }}
-          # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
       - run: gradle dependencies
       - save_cache:
@@ -36,32 +26,61 @@ jobs:
             - ~/.gradle
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
-      # run tests!
-      - run: gradle test
 
-      # save test results
+  # ==================
+  # Stage 2: Unit Test
+  # ==================
+  unitTest:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/repo
+    environment:
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "build.gradle" }}
+          - v1-dependencies-
+      # Run unit tests, save results
+      - run: gradle unitTests
       - run:
-          name: Save test results
           command: |
-            mkdir -p ~/junit/
-            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/junit/ \;
+            mkdir -p ~/unit/
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/unit/ \;
           when: always
       - store_test_results:
-          path: ~/junit
+          path: ~/unit
       - store_artifacts:
-          path: ~/junit
+          path: ~/unit
 
-      # build jar
+
+  # ===============================================
+  # Step 3: Build Artifact, docker image and upload
+  # ===============================================
+  build:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/repo
+    environment:
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "build.gradle" }}
+          - v1-dependencies-
+      # Build jar
       - run: gradle shadowJar
       - run:
-          name: Copy jar
           command: |
             mkdir -p ~/jars/
             find . -type f -regex ".*/build/libs/heimdall-.*jar" -exec cp {} ~/jars/ \;
       - store_artifacts:
           path: ~/jars
-
-      # build docker image
+      # Build docker image
       - setup_remote_docker
       - run:
           name: Build docker image
@@ -76,3 +95,10 @@ jobs:
               echo "pushed image to docker"
             fi
 
+workflows:
+  version: 2
+  test_and_build:
+    jobs:
+      - cache
+      - unitTest
+      - build

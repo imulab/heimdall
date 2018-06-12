@@ -31,9 +31,17 @@ dependencies {
     testCompile "org.assertj:assertj-core:$assertJVersion"
 }
 
-test {
+task unitTests(type: Test) {
     useJUnitPlatform {
-        excludeTags 'slow'
+        excludeTags 'integration'
+        includeEngines 'junit-jupiter', 'junit-vintage'
+    }
+    failFast = true
+}
+
+task integrationTests(type: Test) {
+    useJUnitPlatform {
+        includeTags 'integration'
         includeEngines 'junit-jupiter', 'junit-vintage'
     }
     failFast = true
