@@ -103,6 +103,19 @@ jobs:
             - heimdall.jar
             - Dockerfile
 
+      - setup_remote_docker
+      - run:
+          name: Build docker image
+          command: |
+            docker build -t imulab/heimdall:$APP_VERSION .
+      - run:
+          name: Upload docker image
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+              docker push imulab/heimdall:$APP_VERSION
+            fi
+
 
   # ===================
   # Step 3: Build Image

@@ -1,6 +1,6 @@
 FROM openjdk:8-jre-alpine3.7
 
 RUN ls -al .
-ADD heimdal.jar .
+ADD ./build/libs/heimdall-0.0.1-SNAPSHOT.jar .
 
-ENTRYPOINT java -jar heimdall.jar
+ENTRYPOINT java -jar heimdall-0.0.1-SNAPSHOT.jar
