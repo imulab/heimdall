@@ -9,7 +9,7 @@ repositories {
     jcenter()
 }
 
-version = '0.0.1-SNAPSHOT'
+version = project.findProperty('projectVersion') ?: '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 mainClassName = 'io.vertx.core.Launcher'
 
@@ -50,7 +50,6 @@ task integrationTests(type: Test) {
 shadowJar {
     baseName = 'heimdall'
     classifier = null
-    version = 'latest'
     manifest {
         attributes "Main-Verticle": mainVerticleName
     }
