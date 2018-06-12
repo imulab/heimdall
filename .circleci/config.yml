@@ -99,7 +99,7 @@ jobs:
       - persist_to_workspace:
           root: ~/jars/
           paths:
-            - heimdall-$APP_VERSION.jar
+            - "heimdall-$APP_VERSION.jar"
 
 
   # ===================
