@@ -51,3 +51,18 @@ jobs:
       - store_artifacts:
           path: ~/junit
 
+      # build docker image
+      - setup_remote_docker
+      - run:
+          name: Build docker image
+          command: |
+            docker build -t imulab/heimdall:latest .
+      - run:
+          name: Upload docker image
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+              docker push imulab/heimdall:latest
+              echo "pushed image to docker"
+            fi
+
