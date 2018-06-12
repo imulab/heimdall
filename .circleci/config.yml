@@ -43,7 +43,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~
+          at: /home/circleci
       # Run unit tests, save results
       - run: gradle unitTests
       - run:
