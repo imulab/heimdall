@@ -25,7 +25,10 @@ jobs:
           paths:
             - ~/.gradle
           key: v1-dependencies-{{ checksum "build.gradle" }}
-
+      - persist_to_workspace:
+          root: ~
+          paths:
+            - .gradle
 
   # ==================
   # Stage 2: Unit Test
@@ -39,10 +42,8 @@ jobs:
       TERM: dumb
     steps:
       - checkout
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "build.gradle" }}
-          - v1-dependencies-
+      - attach_workspace:
+          at: ~
       # Run unit tests, save results
       - run: gradle unitTests
       - run:
