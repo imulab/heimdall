@@ -93,13 +93,13 @@ jobs:
       - run:
           command: |
             mkdir -p ~/jars/
-            find . -type f -regex ".*/build/libs/heimdall-$APP_VERSION.jar" -exec cp {} ~/jars/ \;
+            find . -type f -regex ".*/build/libs/heimdall-$APP_VERSION.jar" -exec cp {} ~/jars/heimdall.jar \;
       - store_artifacts:
           path: ~/jars
       - persist_to_workspace:
           root: ~/jars/
           paths:
-            - "heimdall-$APP_VERSION.jar"
+            - heimdall.jar
 
 
   # ===================
@@ -117,7 +117,7 @@ jobs:
       - run:
           name: Copy workspace jar
           command: |
-            cp /tmp/workspace/heimdall-$$APP_VERSION.jar /app/heimdall.jar
+            cp /tmp/workspace/heimdall.jar /app/heimdall.jar
       - setup_remote_docker
       - run:
           name: Build docker image
