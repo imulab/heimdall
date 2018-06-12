@@ -119,6 +119,9 @@ jobs:
           command: |
             cp /tmp/workspace/heimdall.jar .
       - run:
+          command: |
+            ls -al .
+      - run:
           name: Build docker image
           command: |
             docker build -t imulab/heimdall:$APP_VERSION .
