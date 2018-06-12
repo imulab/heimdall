@@ -3,36 +3,30 @@
 # Check https://circleci.com/docs/2.0/language-java/ for more details
 #
 version: 2
-jobs:
-  # ===========================
-  # Stage 1: Cache dependencies
-  # ===========================
-  cache:
-    docker:
-      - image: circleci/openjdk:8-jdk
-    working_directory: ~/repo
-    environment:
-      JVM_OPTS: -Xmx3200m
-      TERM: dumb
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "build.gradle" }}
-          - v1-dependencies-
-      - run: gradle dependencies
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: v1-dependencies-{{ checksum "build.gradle" }}
-      - persist_to_workspace:
-          root: /home/circleci
-          paths:
-            - .gradle
 
-  # ==================
-  # Stage 2: Unit Test
-  # ==================
+restore_gradle_cache: &restore_gradle_cache
+  restore_cache:
+    keys:
+      - gradle-dep-{{ checksum "build.gradle" }}
+      - gradle-dep-
+
+save_gradle_cache: &save_gradle_cache
+  save_cache:
+    paths:
+      - /home/circleci/.gradle
+    key: gradle-dep-{{ checksum "build.gradle" }}
+
+copy_test_result: &copy_test_result
+  run:
+    command: |
+      mkdir -p $TEST_RESULT
+      find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $TEST_RESULT \;
+    when: always
+
+jobs:
+  # ====================
+  # Stage 1.1: Unit Test
+  # ====================
   unitTest:
     docker:
       - image: circleci/openjdk:8-jdk
@@ -40,22 +34,41 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
       TERM: dumb
+      TEST_RESULT: ~/unit
     steps:
       - checkout
-      - attach_workspace:
-          at: /home/circleci
-      # Run unit tests, save results
+      - *restore_gradle_cache
+      - run: gradle dependencies
+      - *save_gradle_cache
       - run: gradle unitTests
-      - run:
-          command: |
-            mkdir -p ~/unit/
-            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/unit/ \;
-          when: always
+      - *copy_test_result
       - store_test_results:
-          path: ~/unit
+          path: $TEST_RESULT
       - store_artifacts:
-          path: ~/unit
+          path: $TEST_RESULT
 
+  # ===========================
+  # Stage 1.2: Integration Test
+  # ===========================
+  integrationTest:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/repo
+    environment:
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+      TEST_RESULT: ~/integration
+    steps:
+      - checkout
+      - *restore_gradle_cache
+      - run: gradle dependencies
+      - *save_gradle_cache
+      - run: gradle integrationTests
+      - *copy_test_result
+      - store_test_results:
+          path: $TEST_RESULT
+      - store_artifacts:
+          path: $TEST_RESULT
 
   # ===============================================
   # Step 3: Build Artifact, docker image and upload
@@ -69,11 +82,9 @@ jobs:
       TERM: dumb
     steps:
       - checkout
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "build.gradle" }}
-          - v1-dependencies-
-      # Build jar
+      - *restore_gradle_cache
+      - run: gradle dependencies
+      - *save_gradle_cache
       - run: gradle shadowJar
       - run:
           command: |
@@ -100,10 +111,9 @@ workflows:
   version: 2
   test_and_build:
     jobs:
-      - cache
-      - unitTest:
-          requires:
-            - cache
+      - unitTest
+      - integrationTest
       - build:
           requires:
             - unitTest
+            - integrationTest
