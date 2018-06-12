@@ -39,8 +39,8 @@ jobs:
       - checkout
       - *restore_gradle_cache
       - run: gradle dependencies
-      - *save_gradle_cache
       - run: gradle unitTests
+      - *save_gradle_cache
       - *copy_test_result
       - store_test_results:
           path: $TEST_RESULT
@@ -62,8 +62,8 @@ jobs:
       - checkout
       - *restore_gradle_cache
       - run: gradle dependencies
-      - *save_gradle_cache
       - run: gradle integrationTests
+      - *save_gradle_cache
       - *copy_test_result
       - store_test_results:
           path: $TEST_RESULT
@@ -84,8 +84,8 @@ jobs:
       - checkout
       - *restore_gradle_cache
       - run: gradle dependencies
-      - *save_gradle_cache
       - run: gradle shadowJar
+      - *save_gradle_cache
       - run:
           command: |
             mkdir -p ~/jars/
