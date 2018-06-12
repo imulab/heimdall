@@ -100,5 +100,9 @@ workflows:
   test_and_build:
     jobs:
       - cache
-      - unitTest
-      - build
+      - unitTest:
+          requires:
+            - cache
+      - build:
+          requires:
+            - unitTest
