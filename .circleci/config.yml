@@ -106,8 +106,7 @@ jobs:
   # Step 3: Build Image
   # ===================
   docker_image:
-    docker:
-      - image: docker:18.05.0-ce
+    machine: true
     working_directory: ~/app
     environment:
       <<: *shared_env
@@ -118,8 +117,7 @@ jobs:
       - run:
           name: Copy workspace jar
           command: |
-            cp /tmp/workspace/heimdall.jar ~/app/heimdall.jar
-      - setup_remote_docker
+            cp /tmp/workspace/heimdall.jar .
       - run:
           name: Build docker image
           command: |
