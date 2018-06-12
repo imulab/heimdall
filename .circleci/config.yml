@@ -122,15 +122,22 @@ jobs:
       - run:
           name: Build docker image
           command: |
-            ls -al .
             docker image build -t imulab/heimdall:$APP_VERSION .
       - run:
-          name: Upload docker image, if on master branch
+          name: Tag docker image
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-              docker push imulab/heimdall:$APP_VERSION
+              IMAGE_TAG = imulab/heimdall:$APP_VERSION
+            else
+              IMAGE_TAG = imulab/heimdall:latest
             fi
+            docker tag heimdall $IMAGE_TAG
+            echo "image tagged with $IMAGE_TAG"
+      - run:
+          name: Upload docker image
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+            docker push $IMAGE_TAG
 
 workflows:
   version: 2
