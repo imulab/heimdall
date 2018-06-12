@@ -76,7 +76,7 @@ jobs:
   # ======================
   # Step 2: Build Artifact
   # ======================
-  build:
+  build_app_jar:
     docker:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/repo
@@ -103,45 +103,9 @@ jobs:
             - heimdall.jar
             - Dockerfile
 
-
-  # ===================
-  # Step 3: Build Image
-  # ===================
-  docker_image:
-#    docker:
-#      - image: docker:18.05.0-ce-git
-    machine: true
-#    working_directory: ~/repo
-    environment:
-      TERM: dumb
-      <<: *shared_env
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /tmp/workspace
-#      - run:
-#          name: Copy workspace jar
-#          command: |
-#            mkdir -p ~/repo/build/
-#            cp /tmp/workspace/heimdall.jar ~/repo/build/
-      - run:
-          command: |
-            sudo chown root:root /tmp/workspace/Dockerfile
-            sudo chown root:root /tmp/workspace/heimdall.jar
-            ls -al /tmp/workspace
-      - setup_remote_docker
-      - run:
-          name: Build docker image
-          command: |
-            docker build -t imulab/heimdall:$APP_VERSION /tmp/workspace
-      - run:
-          name: Upload docker image
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-              docker push imulab/heimdall:$APP_VERSION
-            fi
-
+  # ==========================
+  # Step 3: Build Docker Image
+  # ==========================
   build_docker_image:
     docker:
       - image: docker:18.05.0-ce
@@ -174,16 +138,12 @@ workflows:
   version: 2
   app_ci_pipeline:
     jobs:
-      - build
+      - unitTest
+      - integrationTest
+      - build_app_jar:
+          requires:
+            - unitTest
+            - integrationTest
       - build_docker_image:
           requires:
             - build
-#      - unitTest
-#      - integrationTest
-#      - build:
-#          requires:
-#            - unitTest
-#            - integrationTest
-#      - docker_image:
-#          requires:
-#            - build
