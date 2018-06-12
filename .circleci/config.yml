@@ -106,7 +106,7 @@ jobs:
   # ===================
   docker_image:
     docker:
-      image: docker:18.05.0-ce
+      - image: docker:18.05.0-ce
     working_directory: /app
     environment:
       APP_VERSION: *app_version
