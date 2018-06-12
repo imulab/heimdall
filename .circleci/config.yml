@@ -51,6 +51,16 @@ jobs:
       - store_artifacts:
           path: ~/junit
 
+      # build jar
+      - run: gradle shadowJar
+      - run:
+          name: Copy jar
+          command: |
+            mkdir -p ~/jars/
+            find . -type f -regex ".*/build/libs/heimdall-.*jar" -exec cp {} ~/jars/ \;
+      - store_artifacts:
+          path: ~/jars
+
       # build docker image
       - setup_remote_docker
       - run:
