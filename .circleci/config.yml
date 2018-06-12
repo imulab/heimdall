@@ -107,14 +107,13 @@ jobs:
   # ===================
   docker_image:
     docker:
-      - image: circleci/openjdk:8-jdk
+      - image: docker:18.05.0-ce-git
     working_directory: ~/repo
     environment:
       TERM: dumb
       <<: *shared_env
     steps:
       - checkout
-      - setup_remote_docker
       - attach_workspace:
           at: /tmp/workspace
       - run:
