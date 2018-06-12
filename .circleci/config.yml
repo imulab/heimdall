@@ -119,7 +119,6 @@ jobs:
           name: Copy workspace jar
           command: |
             cp /tmp/workspace/heimdall.jar .
-      - setup_remote_docker
       - run:
           command: |
             ls -al .
