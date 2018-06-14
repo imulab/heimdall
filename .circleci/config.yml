@@ -47,9 +47,9 @@ jobs:
             ./.circleci/collect_test_report.sh /home/circleci/unit
           when: always
       - store_test_results:
-          path: $TEST_RESULT
+          path: ~/unit
       - store_artifacts:
-          path: $TEST_RESULT
+          path: ~/unit
 
   # ===========================
   # Stage 1.2: Integration Test
