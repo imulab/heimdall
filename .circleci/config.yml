@@ -39,8 +39,8 @@ jobs:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/repo
     environment:
-      <<: *java_env
       TEST_RESULT: ~/unit
+      <<: *java_env
     steps:
       - checkout
       - *restore_gradle_cache
@@ -61,15 +61,16 @@ jobs:
       - image: circleci/mongo:3.6-jessie
     working_directory: ~/repo
     environment:
-      <<: *java_env
       TEST_RESULT: ~/integration
       MONGO_URI: mongodb://localhost:27017
+      <<: *java_env
     steps:
       - checkout
       - *restore_gradle_cache
       - run:
           command: |
             TEST_MONGO_URI=$MONGO_URI
+            echo $TEST_MONGO_URI
             gradle integrationTests
       - *save_gradle_cache
       - *copy_test_result
