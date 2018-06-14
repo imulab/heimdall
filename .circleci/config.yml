@@ -69,8 +69,7 @@ jobs:
       - *restore_gradle_cache
       - run:
           command: |
-            TEST_MONGO_URI=$MONGO_URI
-            echo $TEST_MONGO_URI
+            export TEST_MONGO_URI=$MONGO_URI
             gradle integrationTests
       - *save_gradle_cache
       - *copy_test_result
