@@ -33,7 +33,7 @@ jobs:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/repo
     environment:
-      TEST_RESULT: ~/unit
+      TEST_RESULT: /home/circleci/unit
       <<: *java_env
     steps:
       - checkout
