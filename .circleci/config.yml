@@ -58,10 +58,12 @@ jobs:
   integrationTest:
     docker:
       - image: circleci/openjdk:8-jdk
+      - image: circleci/mongo:3.6-jessie
     working_directory: ~/repo
     environment:
       <<: *java_env
       TEST_RESULT: ~/integration
+      TEST_MONGO_URI: mongodb://localhost:27017
     steps:
       - checkout
       - *restore_gradle_cache
