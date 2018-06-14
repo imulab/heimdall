@@ -75,12 +75,7 @@ jobs:
             export TEST_MONGO_URI=$MONGO_URI
             gradle integrationTests
       - *save_gradle_cache
-      - run:
-          name: Move test results
-          command: |
-            chmod +x .circleci/collect_test_report.sh
-            ./.circleci/collect_test_report.sh $TEST_RESULT
-          when: always
+      - *move_test_results
       - store_test_results:
           path: /home/circleci/integration
       - store_artifacts:
