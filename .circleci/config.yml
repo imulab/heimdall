@@ -23,12 +23,6 @@ save_gradle_cache: &save_gradle_cache
       - /home/circleci/.gradle
     key: gradle-dep-{{ checksum "build.gradle" }}
 
-copy_test_result: &copy_test_result
-  run:
-    command: |
-      mkdir -p $TEST_RESULT
-      find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $TEST_RESULT \;
-    when: always
 
 jobs:
   # ====================
@@ -46,7 +40,12 @@ jobs:
       - *restore_gradle_cache
       - run: gradle unitTests
       - *save_gradle_cache
-      - *copy_test_result
+      - run:
+          name: Move test results
+          command: |
+            mkdir -p ~/unit
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/unit \;
+          when: always
       - store_test_results:
           path: ~/unit
       - store_artifacts:
@@ -72,7 +71,12 @@ jobs:
             export TEST_MONGO_URI=$MONGO_URI
             gradle integrationTests
       - *save_gradle_cache
-      - *copy_test_result
+      - run:
+          name: Move test results
+          command: |
+            mkdir -p ~/integration
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/integration \;
+          when: always
       - store_test_results:
           path: ~/integration
       - store_artifacts:
