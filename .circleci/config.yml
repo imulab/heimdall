@@ -43,8 +43,8 @@ jobs:
       - run:
           name: Move test results
           command: |
-            chmod +x $CIRCLE_WORKING_DIRECTORY/.circleci/collect_test_report.sh
-            ./$CIRCLE_WORKING_DIRECTORY/.circleci/collect_test_report.sh $TEST_RESULT
+            chmod +x .circleci/collect_test_report.sh
+            ./.circleci/collect_test_report.sh $TEST_RESULT
           when: always
       - store_test_results:
           path: $TEST_RESULT
@@ -74,8 +74,8 @@ jobs:
       - run:
           name: Move test results
           command: |
-            chmod +x $CIRCLE_WORKING_DIRECTORY/.circleci/collect_test_report.sh
-            ./$CIRCLE_WORKING_DIRECTORY/.circleci/collect_test_report.sh $TEST_RESULT
+            chmod +x .circleci/collect_test_report.sh
+            ./.circleci/collect_test_report.sh $TEST_RESULT
           when: always
       - store_test_results:
           path: $TEST_RESULT
