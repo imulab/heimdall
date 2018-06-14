@@ -48,9 +48,9 @@ jobs:
       - *save_gradle_cache
       - *copy_test_result
       - store_test_results:
-          path: $TEST_RESULT
+          path: ~/unit
       - store_artifacts:
-          path: $TEST_RESULT
+          path: ~/unit
 
   # ===========================
   # Stage 1.2: Integration Test
@@ -74,9 +74,9 @@ jobs:
       - *save_gradle_cache
       - *copy_test_result
       - store_test_results:
-          path: $TEST_RESULT
+          path: ~/integration
       - store_artifacts:
-          path: $TEST_RESULT
+          path: ~/integration
 
   # ======================
   # Step 2: Build Artifact
