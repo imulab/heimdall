@@ -23,6 +23,15 @@ save_gradle_cache: &save_gradle_cache
       - /home/circleci/.gradle
     key: gradle-dep-{{ checksum "build.gradle" }}
 
+move_test_results: &move_test_results
+  run:
+    name: Move test results
+    command: |
+      export TEST_RESULT
+      chmod +x .circleci/collect_test_report.sh
+      ./.circleci/collect_test_report.sh $TEST_RESULT
+    when: always
+
 
 jobs:
   # ====================
@@ -40,13 +49,7 @@ jobs:
       - *restore_gradle_cache
       - run: gradle unitTests
       - *save_gradle_cache
-      - run:
-          name: Move test results
-          command: |
-            export TEST_RESULT
-            chmod +x .circleci/collect_test_report.sh
-            ./.circleci/collect_test_report.sh $TEST_RESULT
-          when: always
+      - *move_test_results
       - store_test_results:
           path: ~/unit
       - store_artifacts:
@@ -61,7 +64,7 @@ jobs:
       - image: circleci/mongo:3.6-jessie
     working_directory: ~/repo
     environment:
-      TEST_RESULT: ~/integration
+      TEST_RESULT: /home/circleci/integration
       MONGO_URI: mongodb://localhost:27017
       <<: *java_env
     steps:
@@ -79,9 +82,9 @@ jobs:
             ./.circleci/collect_test_report.sh $TEST_RESULT
           when: always
       - store_test_results:
-          path: ~/integration
+          path: /home/circleci/integration
       - store_artifacts:
-          path: ~/integration
+          path: /home/circleci/integration
 
   # ======================
   # Step 2: Build Artifact
