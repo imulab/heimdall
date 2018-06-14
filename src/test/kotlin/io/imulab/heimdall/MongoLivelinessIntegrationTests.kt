@@ -19,9 +19,9 @@ class MongoLivelinessIntegrationTests {
 
     @BeforeEach
     fun setup(vtx: Vertx, tc: VertxTestContext) {
-        println(System.getProperty("TEST_MONGO_URI", "mongodb://localhost:32770"))
+        println(System.getenv("TEST_MONGO_URI") ?: "mongodb://localhost:32770")
         mongo = MongoClient.createShared(vtx, JsonObject().put("connection_string",
-                System.getProperty("TEST_MONGO_URI", "mongodb://localhost:32770")))
+                System.getenv("TEST_MONGO_URI") ?: "mongodb://localhost:32770"))
         tc.completeNow()
     }
 
