@@ -27,7 +27,6 @@ move_test_results: &move_test_results
   run:
     name: Move test results
     command: |
-      export TEST_RESULT
       chmod +x .circleci/collect_test_report.sh
       ./.circleci/collect_test_report.sh $TEST_RESULT
     when: always
