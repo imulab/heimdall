@@ -11,6 +11,7 @@ build/
 bin/
 .settings
 out/
+reports/
 
 # Ignore VertX file cache
 .vertx/

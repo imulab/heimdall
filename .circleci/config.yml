@@ -31,10 +31,37 @@ move_test_results: &move_test_results
       ./.circleci/collect_test_report.sh $TEST_RESULT
     when: always
 
+move_code_analysis_results: &move_code_analysis_results
+  run:
+    name: Move code analysis results
+    command: |
+      chmod +x .circleci/collect_code_analysis_report.sh
+      ./.circleci/collect_code_analysis_report.sh $ANALYSIS_RESULT
+    when: always
 
 jobs:
+  # ======================
+  # Stage 1: Code Analysis
+  # ======================
+  codeAnalysis:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/repo
+    environment:
+      <<: *java_env
+      ANALYSIS_RESULT: /home/circleci/detekt
+    steps:
+      - checkout
+      - *restore_gradle_cache
+      - run: gradle detektCheck
+      - *save_gradle_cache
+      - *move_code_analysis_results
+      - store_artifacts:
+          path: ~/detekt
+
+
   # ====================
-  # Stage 1.1: Unit Test
+  # Stage 2.1: Unit Test
   # ====================
   unitTest:
     docker:
@@ -55,7 +82,7 @@ jobs:
           path: ~/unit
 
   # ===========================
-  # Stage 1.2: Integration Test
+  # Stage 2.2: Integration Test
   # ===========================
   integrationTest:
     docker:
@@ -81,7 +108,7 @@ jobs:
           path: /home/circleci/integration
 
   # ======================
-  # Step 2: Build Artifact
+  # Step 3: Build Artifact
   # ======================
   build_app_jar:
     docker:
@@ -109,7 +136,7 @@ jobs:
             - Dockerfile
 
   # ==========================
-  # Step 3: Build Docker Image
+  # Step 4: Build Docker Image
   # ==========================
   build_docker_image:
     docker:
@@ -146,8 +173,13 @@ workflows:
   version: 2
   app_ci_pipeline:
     jobs:
-      - unitTest
-      - integrationTest
+      - codeAnalysis
+      - unitTest:
+          requires:
+            - codeAnalysis
+      - integrationTest:
+          requires:
+            - codeAnalysis
       - build_app_jar:
           requires:
             - unitTest
