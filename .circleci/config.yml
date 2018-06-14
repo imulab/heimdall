@@ -44,7 +44,7 @@ jobs:
           name: Move test results
           command: |
             chmod +x .circleci/collect_test_report.sh
-            ./.circleci/collect_test_report.sh $TEST_RESULT
+            ./.circleci/collect_test_report.sh /home/circleci/unit
           when: always
       - store_test_results:
           path: $TEST_RESULT
