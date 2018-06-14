@@ -1,0 +1,20 @@
+version: '3'
+services:
+  heimdall:
+    image: imulab/heimdall
+    container_name: heimdall
+    ports:
+      - 8080:8080
+    links:
+      - mongodb
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:3.4-jessie
+    container_name: heimdall-mongo
+    volumes:
+      - /tmp/heimdall-mongo:/data/db
+    ports:
+     - 27017:27017
+    command: mongod --smallfiles --logpath=/dev/null
