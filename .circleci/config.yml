@@ -43,13 +43,13 @@ jobs:
       - run:
           name: Move test results
           command: |
-            mkdir -p ~/unit
-            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/unit \;
+            chmod +x $CIRCLE_WORKING_DIRECTORY/.circleci/collect_test_report.sh
+            ./$CIRCLE_WORKING_DIRECTORY/.circleci/collect_test_report.sh $TEST_RESULT
           when: always
       - store_test_results:
-          path: ~/unit
+          path: $TEST_RESULT
       - store_artifacts:
-          path: ~/unit
+          path: $TEST_RESULT
 
   # ===========================
   # Stage 1.2: Integration Test
@@ -74,13 +74,13 @@ jobs:
       - run:
           name: Move test results
           command: |
-            mkdir -p ~/integration
-            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/integration \;
+            chmod +x $CIRCLE_WORKING_DIRECTORY/.circleci/collect_test_report.sh
+            ./$CIRCLE_WORKING_DIRECTORY/.circleci/collect_test_report.sh $TEST_RESULT
           when: always
       - store_test_results:
-          path: ~/integration
+          path: $TEST_RESULT
       - store_artifacts:
-          path: ~/integration
+          path: $TEST_RESULT
 
   # ======================
   # Step 2: Build Artifact
