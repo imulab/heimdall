@@ -63,11 +63,14 @@ jobs:
     environment:
       <<: *java_env
       TEST_RESULT: ~/integration
-      TEST_MONGO_URI: mongodb://localhost:27017
+      MONGO_URI: mongodb://localhost:27017
     steps:
       - checkout
       - *restore_gradle_cache
-      - run: gradle integrationTests
+      - run:
+          command: |
+            TEST_MONGO_URI=$MONGO_URI
+            gradle integrationTests
       - *save_gradle_cache
       - *copy_test_result
       - store_test_results:
