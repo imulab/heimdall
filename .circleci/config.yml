@@ -44,7 +44,7 @@ jobs:
           name: Move test results
           command: |
             chmod +x .circleci/collect_test_report.sh
-            ./.circleci/collect_test_report.sh /home/circleci/unit
+            ./.circleci/collect_test_report.sh $TEST_RESULT
           when: always
       - store_test_results:
           path: ~/unit
@@ -78,9 +78,9 @@ jobs:
             ./.circleci/collect_test_report.sh $TEST_RESULT
           when: always
       - store_test_results:
-          path: $TEST_RESULT
+          path: ~/integration
       - store_artifacts:
-          path: $TEST_RESULT
+          path: ~/integration
 
   # ======================
   # Step 2: Build Artifact
