@@ -23,7 +23,7 @@ object ServerConfig {
 
     fun config(): JsonObject = config
 
-    fun load(vertx: Vertx, yamlPaths: Set<String> = setOf(), envKeys: Set<String> = setOf()): Completable {
+    fun load(vertx: Vertx, defaults: JsonObject = JsonObject(), yamlPaths: Set<String> = setOf(), envKeys: Set<String> = setOf()): Completable {
         val completable = CompletableSubject.create()
         if (once.get()) {
             return completable.also { it.onComplete() }
@@ -34,11 +34,16 @@ object ServerConfig {
 
             // combine configuration options and convert into Vert.x ConfigStoreOptions
             mutableListOf<Pair<String, Any>>().also { collector ->
+                collector.add(Pair("default", defaults))
                 collector.addAll(yamlPaths.map { Pair("yaml", it) })
                 if (envKeys.isNotEmpty())
                     collector.add(Pair("env", envKeys))
-            }.map {cfg ->
+            }.map { cfg ->
                 when (cfg.first) {
+                    "default" -> ConfigStoreOptions().also { opt ->
+                        opt.type = "json"
+                        opt.config = cfg.second as JsonObject
+                    }
                     "yaml" -> ConfigStoreOptions().also { opt ->
                         opt.type = "file"
                         opt.format = "yaml"
@@ -48,7 +53,7 @@ object ServerConfig {
                         opt.type = "env"
                         opt.config = JsonObject().put("keys", JsonArray((cfg.second as Set<*>).toList()))
                     }
-                    else -> throw RuntimeException("unsupported config type key. ${cfg.first}")
+                    else -> throw InvalidConfigurationException("unsupported config type key. ${cfg.first}")
                 }
             }.forEach { options.addStore(it) }
 
@@ -70,3 +75,5 @@ object ServerConfig {
         once = AtomicBoolean(false)
     }
 }
+
+class InvalidConfigurationException(reason: String) : RuntimeException(reason)
