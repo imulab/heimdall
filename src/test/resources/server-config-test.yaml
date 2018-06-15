@@ -1,0 +1,6 @@
+foo:
+  bar: hello
+  baz:
+    - x
+    - y
+    - z
