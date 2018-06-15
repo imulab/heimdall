@@ -15,15 +15,12 @@ object ServerConfig {
     private var once = AtomicBoolean(false)
     private var config: JsonObject = JsonObject()
 
-    private fun AtomicBoolean.doOnce(action: () -> Unit) {
-        if (!this.getAndSet(true)) {
-            action()
-        }
-    }
-
     fun config(): JsonObject = config
 
-    fun load(vertx: Vertx, defaults: JsonObject = JsonObject(), yamlPaths: Set<String> = setOf(), envKeys: Set<String> = setOf()): Completable {
+    fun load(vertx: Vertx,
+             defaults: JsonObject = JsonObject(),
+             yamlPaths: Set<String> = setOf(),
+             envKeys: Set<String> = setOf()): Completable {
         val completable = CompletableSubject.create()
         if (once.get()) {
             return completable.also { it.onComplete() }
@@ -38,24 +35,11 @@ object ServerConfig {
                 collector.addAll(yamlPaths.map { Pair("yaml", it) })
                 if (envKeys.isNotEmpty())
                     collector.add(Pair("env", envKeys))
-            }.map { cfg ->
-                when (cfg.first) {
-                    "default" -> ConfigStoreOptions().also { opt ->
-                        opt.type = "json"
-                        opt.config = cfg.second as JsonObject
-                    }
-                    "yaml" -> ConfigStoreOptions().also { opt ->
-                        opt.type = "file"
-                        opt.format = "yaml"
-                        opt.config = JsonObject().put("path", cfg.second)
-                    }
-                    "env" -> ConfigStoreOptions().also { opt ->
-                        opt.type = "env"
-                        opt.config = JsonObject().put("keys", JsonArray((cfg.second as Set<*>).toList()))
-                    }
-                    else -> throw InvalidConfigurationException("unsupported config type key. ${cfg.first}")
-                }
-            }.forEach { options.addStore(it) }
+            }.map {
+                it.toConfigStoreOptions()
+            }.forEach {
+                options.addStore(it)
+            }
 
             // Retrieve and cache configurations
             ConfigRetriever.create(vertx, options).getConfig { ar ->
@@ -73,6 +57,31 @@ object ServerConfig {
 
     fun reset() {
         once = AtomicBoolean(false)
+    }
+
+    private fun AtomicBoolean.doOnce(action: () -> Unit) {
+        if (!this.getAndSet(true)) {
+            action()
+        }
+    }
+
+    private fun Pair<String, Any>.toConfigStoreOptions(): ConfigStoreOptions {
+        return when (this.first) {
+            "default" -> ConfigStoreOptions().also { opt ->
+                opt.type = "json"
+                opt.config = this.second as JsonObject
+            }
+            "yaml" -> ConfigStoreOptions().also { opt ->
+                opt.type = "file"
+                opt.format = "yaml"
+                opt.config = JsonObject().put("path", this.second)
+            }
+            "env" -> ConfigStoreOptions().also { opt ->
+                opt.type = "env"
+                opt.config = JsonObject().put("keys", JsonArray((this.second as Set<*>).toList()))
+            }
+            else -> throw InvalidConfigurationException("unsupported config type key. ${this.first}")
+        }
     }
 }
 
