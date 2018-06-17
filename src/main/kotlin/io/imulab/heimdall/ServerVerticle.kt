@@ -6,13 +6,18 @@ import io.vertx.config.ConfigRetrieverOptions
 import io.vertx.config.ConfigStoreOptions
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.JsonObject
+import org.apache.logging.log4j.LogManager
 
 private const val DEFAULT_PORT = 8080
 
 class ServerVerticle : AbstractVerticle() {
 
+    private val logger = LogManager.getLogger(ServerVerticle::class.java)
+
     override fun start() {
-        loadConfiguration().subscribe { json -> println(json) }
+        loadConfiguration().subscribe { json ->
+            logger.info("properties fully loaded!")
+        }
 
         vertx.createHttpServer()
                 .requestHandler{ req -> req.response().end("Hello Vert.x from kotlin!") }

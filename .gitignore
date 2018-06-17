@@ -13,6 +13,9 @@ bin/
 out/
 reports/
 
+# Logs
+log/
+
 # Ignore VertX file cache
 .vertx/
 

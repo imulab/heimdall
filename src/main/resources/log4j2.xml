@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration>
+    <Properties>
+        <Property name="log_dir">log</Property>
+        <Property name="pattern">%d{ISO8601} %-5p %c:%L - %m%n</Property>
+    </Properties>
+    <Appenders>
+        <Console name="stdout">
+            <PatternLayout pattern="${pattern}"/>
+        </Console>
+        <RollingFile name="app" append="true" fileName="${log_dir}/heimdall.log"
+                     filePattern="${log_dir}/heimdall/$${date:yyyy-MM}/heimdall-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout pattern="${pattern}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+        </RollingFile>
+        <RollingFile name="vertx" append="true" fileName="${log_dir}/vertx.log"
+                     filePattern="${log_dir}/vertx/$${date:yyyy-MM}/vertx-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout pattern="${pattern}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+        </RollingFile>
+        <RollingFile name="netty" append="true" fileName="${log_dir}/netty.log"
+                     filePattern="${log_dir}/netty/$${date:yyyy-MM}/netty-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout pattern="${pattern}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+        </RollingFile>
+        <Async name="async_app">
+            <AppenderRef ref="app"/>
+        </Async>
+        <Async name="async_vertx">
+            <AppenderRef ref="vertx"/>
+        </Async>
+        <Async name="async_netty">
+            <AppenderRef ref="netty"/>
+        </Async>
+    </Appenders>
+    <Loggers>
+        <Logger name="io.vertx" level="INFO">
+            <AppenderRef ref="stdout" />
+        </Logger>
+        <Logger name="io.vertx" level="DEBUG">
+            <AppenderRef ref="async_vertx" />
+        </Logger>
+        <Logger name="io.netty" level="DEBUG">
+            <AppenderRef ref="async_netty" />
+        </Logger>
+        <Root level="DEBUG">
+            <AppenderRef ref="stdout" />
+            <AppenderRef ref="async_app" />
+        </Root>
+    </Loggers>
+</Configuration>
