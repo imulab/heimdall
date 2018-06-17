@@ -17,6 +17,32 @@ object ServerConfig {
 
     fun config(): JsonObject = config
 
+    fun property(path: String, default: Any = ""): Any {
+        // check for environment variable equivalent
+        val envKey = path.replace(".", "_", true).toUpperCase()
+        if (config.containsKey(envKey))
+            return config.getValue(envKey)
+
+        // get property from period delimited path
+        val segs = path.split(".")
+        var prop: JsonObject = config
+        segs.forEachIndexed { index, s ->
+            if (index == segs.size - 1)
+                return@forEachIndexed
+
+            if (prop.containsKey(s))
+                prop = prop.getJsonObject(s)
+            else
+                return default
+        }
+
+        return prop.getValue(segs.last(), default)
+    }
+
+    fun propertyAsString(path: String, default: String = ""): String = property(path, default) as String
+
+    fun propertyAsInt(path: String, default: Int = 0): Int = property(path, default) as Int
+
     fun load(vertx: Vertx,
              defaults: JsonObject = JsonObject(),
              yamlPaths: Set<String> = setOf(),

@@ -1,6 +1,7 @@
 package io.imulab.heimdall
 
 import io.vertx.core.Vertx
+import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.junit5.Timeout
 import io.vertx.junit5.VertxExtension
@@ -86,6 +87,21 @@ class ServerConfigTests {
                     assertThat(ServerConfig.config()
                             .getJsonObject("foo")
                             .getJsonArray("baz"))
+                            .contains("x", "y", "z")
+                    tc.completeNow()
+                }, tc::failNow)
+    }
+
+    @Test
+    @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
+    @DisplayName("Test overriding configuration entries")
+    fun testGetProperty(vtx: Vertx, tc: VertxTestContext) {
+        ServerConfig.load(vertx = vtx,
+                yamlPaths = setOf("server-config-test.yaml"))
+                .subscribe({
+                    assertThat(ServerConfig.property("foo.bar")).isEqualTo("hello")
+                    assertThat(ServerConfig.propertyAsString("foo.bar")).isEqualTo("hello")
+                    assertThat(ServerConfig.property("foo.baz") as Iterable<*>)
                             .contains("x", "y", "z")
                     tc.completeNow()
                 }, tc::failNow)
