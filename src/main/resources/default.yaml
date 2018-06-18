@@ -1,0 +1,5 @@
+service:
+  http:
+    port: 8080
+  oauth:
+    stateEntropy: 8
