@@ -39,9 +39,8 @@ class ServerConfigTests {
     @DisplayName("Test loading configuration from the default source")
     fun testLoadDefault(vtx: Vertx, tc: VertxTestContext) {
         ServerConfig.load(vertx = vtx, defaults = JsonObject().put("foo", "bar"))
-                .subscribe({
-                    assertThat(ServerConfig.config()
-                            .getString("foo"))
+                .subscribe({ _ ->
+                    assertThat(ServerConfig.config().getString("foo"))
                             .isEqualTo("bar")
                     tc.completeNow()
                 }, tc::failNow)
@@ -52,7 +51,7 @@ class ServerConfigTests {
     @DisplayName("Test loading configuration from environment variable. (Assuming \$HOME is set)")
     fun testLoadEnv(vtx: Vertx, tc: VertxTestContext) {
         ServerConfig.load(vertx = vtx, envKeys = setOf("HOME"))
-                .subscribe({
+                .subscribe({ _ ->
                     assertThat(ServerConfig.config()
                             .getString("HOME"))
                             .isNotBlank()
@@ -65,7 +64,7 @@ class ServerConfigTests {
     @DisplayName("Test loading configuration twice without reloading, second time should pass.")
     fun testLoadTwice(vtx: Vertx, tc: VertxTestContext) {
         ServerConfig.load(vtx)
-                .andThen(ServerConfig.load(vtx, yamlPaths = setOf("server-config-test.yaml")))
+                .flatMap{ ServerConfig.load(vtx, yamlPaths = setOf("server-config-test.yaml")) }
                 .subscribe({
                     assertThat(ServerConfig.config()).isEmpty()
                     tc.completeNow()

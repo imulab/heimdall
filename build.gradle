@@ -33,6 +33,7 @@ def doOnChange = './gradlew classes'
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     compile "io.vertx:vertx-core:$vertxVersion"
+    compile "io.vertx:vertx-web:$vertxVersion"
     compile "io.vertx:vertx-config:$vertxVersion"
     compile "io.vertx:vertx-config-yaml:$vertxVersion"
     compile "io.vertx:vertx-rx-java2:$vertxVersion"

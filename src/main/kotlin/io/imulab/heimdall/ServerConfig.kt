@@ -1,7 +1,7 @@
 package io.imulab.heimdall
 
-import io.reactivex.Completable
-import io.reactivex.subjects.CompletableSubject
+import io.reactivex.Single
+import io.reactivex.subjects.SingleSubject
 import io.vertx.config.ConfigRetriever
 import io.vertx.config.ConfigRetrieverOptions
 import io.vertx.config.ConfigStoreOptions
@@ -46,10 +46,12 @@ object ServerConfig {
     fun load(vertx: Vertx,
              defaults: JsonObject = JsonObject(),
              yamlPaths: Set<String> = setOf(),
-             envKeys: Set<String> = setOf()): Completable {
-        val completable = CompletableSubject.create()
+             envKeys: Set<String> = setOf()): Single<JsonObject> {
+        val future = SingleSubject.create<JsonObject>()
+
         if (once.get()) {
-            return completable.also { it.onComplete() }
+            future.onSuccess(this.config)
+            return future
         }
 
         once.doOnce {
@@ -70,15 +72,15 @@ object ServerConfig {
             // Retrieve and cache configurations
             ConfigRetriever.create(vertx, options).getConfig { ar ->
                 if (ar.failed())
-                    completable.onError(ar.cause())
+                    future.onError(ar.cause())
                 else {
                     this.config = ar.result()
-                    completable.onComplete()
+                    future.onSuccess(this.config)
                 }
             }
         }
 
-        return completable
+        return future
     }
 
     fun reset() {
@@ -110,5 +112,9 @@ object ServerConfig {
         }
     }
 }
+
+fun stringProp(key: String) = ServerConfig.propertyAsString(key)
+
+fun intProp(key: String) = ServerConfig.propertyAsInt(key)
 
 class InvalidConfigurationException(reason: String) : RuntimeException(reason)

@@ -1,39 +1,62 @@
 package io.imulab.heimdall
 
+import io.reactivex.Completable
 import io.reactivex.Single
-import io.vertx.config.ConfigRetriever
-import io.vertx.config.ConfigRetrieverOptions
-import io.vertx.config.ConfigStoreOptions
+import io.reactivex.subjects.CompletableSubject
 import io.vertx.core.AbstractVerticle
+import io.vertx.core.Future
+import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.web.Router
 import org.apache.logging.log4j.LogManager
-
-private const val DEFAULT_PORT = 8080
 
 class ServerVerticle : AbstractVerticle() {
 
     private val logger = LogManager.getLogger(ServerVerticle::class.java)
 
-    override fun start() {
-        loadConfiguration().subscribe { json ->
-            logger.info("properties fully loaded!")
+    override fun start(startFuture: Future<Void>) {
+        loadConfiguration()
+                .doOnSuccess{ logger.info("configuration loaded.") }
+                .flatMapCompletable { startHttpServer().doOnComplete{ logger.info("http server started.") } }
+                .subscribe({
+                    logger.info("service fully started.")
+                    startFuture.complete()
+                }, startFuture::fail)
+    }
+
+    private fun startHttpServer(): Completable {
+        val c = CompletableSubject.create()
+        val router = Router.router(vertx)
+
+        router.route("/").handler { rc ->
+            rc.response().end("Hello Vert.x from kotlin!")
         }
 
-        vertx.createHttpServer()
-                .requestHandler{ req -> req.response().end("Hello Vert.x from kotlin!") }
-                .listen(DEFAULT_PORT)
+        vertx.createHttpServer(HttpServerOptions())
+                .requestHandler(router::accept)
+                .listen(intProp("service.http.port")) {
+                    if (it.succeeded())
+                        c.onComplete()
+                    else
+                        c.onError(it.cause())
+                }
+
+        return c
     }
 
     private fun loadConfiguration(): Single<JsonObject> {
-        return io.vertx.reactivex.config.ConfigRetriever(ConfigRetriever.create(vertx, ConfigRetrieverOptions()
-                .addStore(ConfigStoreOptions().also {
-                    it.type = "file"
-                    it.format = "yaml"
-                    it.config = JsonObject().put("path", "app.yaml")
-                })
-                .addStore(ConfigStoreOptions().also {
-                    it.type = "env"
-                })))
-                .rxGetConfig()
+        val defaultConfig = JsonObject()
+                .put("service", JsonObject()
+                        .put("http", JsonObject()
+                                .put("port", DEFAULT_HTTP_PORT)
+                        )
+                )
+        val yamlConfigPaths = setOf(CONFIG_FILE)
+        val envConfigKeys = setOf<String>()
+
+        return ServerConfig.load(vertx, defaultConfig, yamlConfigPaths, envConfigKeys)
     }
 }
+
+private const val DEFAULT_HTTP_PORT = 8080
+private const val CONFIG_FILE = "app.yaml"
