@@ -1,5 +1,8 @@
 package io.imulab.heimdall
 
+import io.imulab.heimdall.handler.AuthorizationEndpoint
+import io.imulab.heimdall.handler.ErrorHandler
+import io.imulab.heimdall.handler.TokenEndpointHandler
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.subjects.CompletableSubject
@@ -28,9 +31,14 @@ class ServerVerticle : AbstractVerticle() {
         val c = CompletableSubject.create()
         val router = Router.router(vertx)
 
-        router.route("/").handler { rc ->
-            rc.response().end("Hello Vert.x from kotlin!")
-        }
+        router.route("/").handler { rc -> rc.response().end("Hello Vert.x from kotlin!") }
+        router.get("/authorize")
+                .handler(AuthorizationEndpoint)
+                .failureHandler(ErrorHandler)
+        router.post("/oauth/token")
+                .consumes("application/json")
+                .handler(TokenEndpointHandler)
+                .failureHandler(ErrorHandler)
 
         vertx.createHttpServer(HttpServerOptions())
                 .requestHandler(router::accept)
@@ -46,11 +54,6 @@ class ServerVerticle : AbstractVerticle() {
 
     private fun loadConfiguration(): Single<JsonObject> {
         val defaultConfig = JsonObject()
-                .put("service", JsonObject()
-                        .put("http", JsonObject()
-                                .put("port", DEFAULT_HTTP_PORT)
-                        )
-                )
         val yamlConfigPaths = setOf(CONFIG_FILE)
         val envConfigKeys = setOf<String>()
 
@@ -58,5 +61,4 @@ class ServerVerticle : AbstractVerticle() {
     }
 }
 
-private const val DEFAULT_HTTP_PORT = 8080
-private const val CONFIG_FILE = "app.yaml"
+private const val CONFIG_FILE = "default.yaml"

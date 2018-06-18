@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 
 @Tag("integration")
 @ExtendWith(VertxExtension::class)
-class MongoLivelinessIntegrationTests {
+class MongoLivelinessTests {
 
     private lateinit var mongo: MongoClient
 
