@@ -24,6 +24,7 @@ mainClassName = 'io.vertx.core.Launcher'
 def vertxVersion = '3.5.2'
 def kotlinVersion = '1.2.41'
 def log4j2Version = '2.11.0'
+def okHttpVersion = '3.10.0'
 def junitVersion = '5.2.0'
 def assertJVersion = '3.10.0'
 def mainVerticleName = 'io.imulab.heimdall.ServerVerticle'
@@ -40,6 +41,7 @@ dependencies {
     compile "io.vertx:vertx-mongo-client:$vertxVersion"
     compile "org.apache.logging.log4j:log4j-api:$log4j2Version"
     compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
+    compile "com.squareup.okhttp3:okhttp:$okHttpVersion"
     testCompile "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntime "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
     testCompile "io.vertx:vertx-unit:$vertxVersion"

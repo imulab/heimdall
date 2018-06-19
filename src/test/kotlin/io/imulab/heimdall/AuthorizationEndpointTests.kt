@@ -6,6 +6,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.junit5.Timeout
 import io.vertx.junit5.VertxExtension
 import io.vertx.junit5.VertxTestContext
+import okhttp3.HttpUrl
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -20,6 +21,22 @@ class AuthorizationEndpointTests {
     @DisplayName("Deploy server verticle for tests")
     fun setup(vtx: Vertx, tc: VertxTestContext) {
         vtx.deployVerticle(ServerVerticle::class.java.name, tc.succeeding { tc.completeNow() })
+    }
+
+    @Test
+    @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
+    @DisplayName("Endpoint should successfully redirect user agent.")
+    fun testSuccessfulRedirection(vtx: Vertx, tc: VertxTestContext) {
+        val uri = "/authorize?response_type=code&client_id=xyz&state=foofoofoo"
+        vtx.createHttpClient().getNow(8080, "localhost", uri) { r ->
+            assertThat(r.statusCode()).isEqualTo(302)
+            val redirect = HttpUrl.parse(r.getHeader("Location"))
+            assertThat(redirect).isNotNull
+            redirect!!
+            assertThat(redirect.queryParameter("token")).isNotBlank()
+            assertThat(redirect.queryParameter("state")).isNotBlank()
+            tc.completeNow()
+        }
     }
 
     @Test

@@ -1,10 +1,12 @@
 package io.imulab.heimdall.handler
 
 import io.imulab.heimdall.intProp
+import io.imulab.heimdall.stringProp
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.Handler
 import io.vertx.core.http.HttpServerRequest
 import io.vertx.ext.web.RoutingContext
+import okhttp3.HttpUrl
 import java.net.URI
 
 object AuthorizationEndpoint : Handler<RoutingContext> {
@@ -14,8 +16,25 @@ object AuthorizationEndpoint : Handler<RoutingContext> {
         println(form)
         rc.response()
                 .setStatusCode(HttpResponseStatus.FOUND.code())
-                .putHeader("Location", "https://consent.com")
+                .putHeader("Location", buildRedirectURL("foobar", "12345678"))
                 .end()
+    }
+
+    private fun buildRedirectURL(token: String, state: String): String {
+        return HttpUrl.Builder().also {
+            val scheme = stringProp("service.oauth.consent.scheme")
+            it.scheme(if (scheme.isBlank()) "https" else scheme)
+
+            val host = stringProp("service.oauth.consent.host")
+            it.host(if (host.isBlank()) "localhost" else host)
+
+            val port = intProp("service.oauth.consent.port")
+            if (port > 0)
+                it.port(port)
+
+            it.addQueryParameter("token", token)
+            it.addQueryParameter("state", state)
+        }.build().toString()
     }
 
     private fun HttpServerRequest.toRequestForm(): AuthorizationForm {
@@ -42,7 +61,7 @@ object AuthorizationEndpoint : Handler<RoutingContext> {
             }
         }
 
-        val minEntropy = intProp("service.oauth.stateEntropy")
+        val minEntropy = intProp("service.oauth.state.entropy")
         if (form.state.length < minEntropy)
             throw InvalidRequestException("weak state entropy, minimum is $minEntropy")
 

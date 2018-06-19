@@ -2,4 +2,9 @@ service:
   http:
     port: 8080
   oauth:
-    stateEntropy: 8
+    state:
+      entropy: 8
+    consent:
+      scheme: http
+      host: 127.0.0.1
+      port: 9000
