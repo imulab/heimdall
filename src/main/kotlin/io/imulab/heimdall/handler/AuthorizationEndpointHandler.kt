@@ -1,6 +1,7 @@
 package io.imulab.heimdall.handler
 
 import io.imulab.heimdall.intProp
+import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.Handler
 import io.vertx.core.http.HttpServerRequest
 import io.vertx.ext.web.RoutingContext
@@ -11,7 +12,10 @@ object AuthorizationEndpoint : Handler<RoutingContext> {
     override fun handle(rc: RoutingContext) {
         val form = rc.request().toRequestForm()
         println(form)
-        rc.response().setStatusCode(302).putHeader("Location", "https://consent.com").end()
+        rc.response()
+                .setStatusCode(HttpResponseStatus.FOUND.code())
+                .putHeader("Location", "https://consent.com")
+                .end()
     }
 
     private fun HttpServerRequest.toRequestForm(): AuthorizationForm {
@@ -22,7 +26,8 @@ object AuthorizationEndpoint : Handler<RoutingContext> {
         val form = AuthorizationForm(
                 responseType = this.getParam(PARAM_RESPONSE_TYPE),
                 clientId = this.getParam(PARAM_CLIENT_ID),
-                scopes = if (this.params().contains(PARAM_SCOPE)) this.getParam(PARAM_SCOPE).split(" ").toSet() else emptySet(),
+                scopes = if (this.params().contains(PARAM_SCOPE))
+                    this.getParam(PARAM_SCOPE).split(" ").toSet() else emptySet(),
                 redirectURI = if (this.params().contains(PARAM_REDIRECT_URI)) this.getParam(PARAM_REDIRECT_URI) else "",
                 state = this.getParam(PARAM_STATE))
 

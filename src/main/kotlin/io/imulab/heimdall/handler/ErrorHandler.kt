@@ -1,5 +1,6 @@
 package io.imulab.heimdall.handler
 
+import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.Handler
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
@@ -25,7 +26,7 @@ object ErrorHandler : Handler<RoutingContext> {
                                 .put(FIELD_ERROR_DESCRIPTION, f.message)))
             else -> {
                 logger.error("error handler received unknown error", f)
-                ctx.response().setStatusCode(500).end("unknown_error")
+                ctx.response().setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code()).end("unknown_error")
             }
         }
     }
