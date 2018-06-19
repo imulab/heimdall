@@ -1,8 +1,6 @@
 package io.imulab.heimdall
 
-import io.imulab.heimdall.handler.AuthorizationEndpoint
-import io.imulab.heimdall.handler.ErrorHandler
-import io.imulab.heimdall.handler.TokenEndpointHandler
+import io.imulab.heimdall.handler.*
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.subjects.CompletableSubject
@@ -35,9 +33,12 @@ class ServerVerticle : AbstractVerticle() {
         router.get("/authorize")
                 .handler(AuthorizationEndpoint)
                 .failureHandler(ErrorHandler)
+        router.get("/consent")
+                .handler(ConsentEndpoint)
+                .failureHandler(ErrorHandler)
         router.post("/oauth/token")
                 .consumes("application/json")
-                .handler(TokenEndpointHandler)
+                .handler(TokenEndpoint)
                 .failureHandler(ErrorHandler)
 
         vertx.createHttpServer(HttpServerOptions())
