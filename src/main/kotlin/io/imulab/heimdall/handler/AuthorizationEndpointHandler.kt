@@ -22,6 +22,7 @@ object AuthorizationEndpoint : Handler<RoutingContext> {
         val form = AuthorizationForm(
                 responseType = this.getParam(PARAM_RESPONSE_TYPE),
                 clientId = this.getParam(PARAM_CLIENT_ID),
+                scopes = if (this.params().contains(PARAM_SCOPE)) this.getParam(PARAM_SCOPE).split(" ").toSet() else emptySet(),
                 redirectURI = if (this.params().contains(PARAM_REDIRECT_URI)) this.getParam(PARAM_REDIRECT_URI) else "",
                 state = this.getParam(PARAM_STATE))
 
@@ -45,6 +46,7 @@ object AuthorizationEndpoint : Handler<RoutingContext> {
 
     private const val PARAM_RESPONSE_TYPE = "response_type"
     private const val PARAM_CLIENT_ID = "client_id"
+    private const val PARAM_SCOPE = "scope"
     private const val PARAM_REDIRECT_URI = "redirect_uri"
     private const val PARAM_STATE = "state"
 
@@ -54,5 +56,6 @@ object AuthorizationEndpoint : Handler<RoutingContext> {
 
 data class AuthorizationForm(val responseType: String,
                              val clientId: String,
+                             val scopes: Set<String>,
                              var redirectURI: String,
                              val state: String)
