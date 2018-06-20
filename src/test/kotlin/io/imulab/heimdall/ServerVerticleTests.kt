@@ -2,15 +2,15 @@ package io.imulab.heimdall
 
 import io.vertx.core.Vertx
 import io.vertx.junit5.Timeout
-import org.assertj.core.api.Assertions.*
-import io.vertx.junit5.VertxExtension
 import io.vertx.junit5.VertxTestContext
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.extension.ExtendWith
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 
-@ExtendWith(VertxExtension::class)
-class ServerVerticleTests {
+class ServerVerticleTests : ServerFunctionTests() {
 
     @BeforeEach
     @DisplayName("Deploy server verticle for tests")
@@ -31,12 +31,10 @@ class ServerVerticleTests {
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     @DisplayName("Server should have started")
     fun testServerStarted(vtx: Vertx, tc: VertxTestContext) {
-        vtx.createHttpClient().getNow(8080, "localhost", "/") { r ->
-            assertThat(r.statusCode()).isEqualTo(200)
-            r.bodyHandler { body ->
-                assertThat(body.length()).isGreaterThan(0)
-                tc.completeNow()
-            }
+        httpGet(vtx = vtx,
+                uri = "/") {
+            assertThat(it.length()).isGreaterThan(0)
+            tc.completeNow()
         }
     }
 }
