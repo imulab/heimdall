@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit
 class ServerConfigTests {
 
     @Test
-    @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
+    @Timeout(value = 30, timeUnit = TimeUnit.SECONDS)
     @DisplayName("Test loading configuration from a YAML file")
     fun testLoadYaml(vtx: Vertx, tc: VertxTestContext) {
         ServerConfig.load(vertx = vtx, yamlPaths = setOf("server-config-test.yaml"))
@@ -35,7 +35,7 @@ class ServerConfigTests {
     }
 
     @Test
-    @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
+    @Timeout(value = 30, timeUnit = TimeUnit.SECONDS)
     @DisplayName("Test loading configuration from the default source")
     fun testLoadDefault(vtx: Vertx, tc: VertxTestContext) {
         ServerConfig.load(vertx = vtx, defaults = JsonObject().put("foo", "bar"))
@@ -47,7 +47,7 @@ class ServerConfigTests {
     }
 
     @Test
-    @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
+    @Timeout(value = 30, timeUnit = TimeUnit.SECONDS)
     @DisplayName("Test loading configuration from environment variable. (Assuming \$HOME is set)")
     fun testLoadEnv(vtx: Vertx, tc: VertxTestContext) {
         ServerConfig.load(vertx = vtx, envKeys = setOf("HOME"))
@@ -60,7 +60,7 @@ class ServerConfigTests {
     }
 
     @Test
-    @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
+    @Timeout(value = 30, timeUnit = TimeUnit.SECONDS)
     @DisplayName("Test loading configuration twice without reloading, second time should pass.")
     fun testLoadTwice(vtx: Vertx, tc: VertxTestContext) {
         ServerConfig.load(vtx)
@@ -72,7 +72,7 @@ class ServerConfigTests {
     }
 
     @Test
-    @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
+    @Timeout(value = 30, timeUnit = TimeUnit.SECONDS)
     @DisplayName("Test overriding configuration entries")
     fun testLoadOverride(vtx: Vertx, tc: VertxTestContext) {
         ServerConfig.load(vertx = vtx,
@@ -92,7 +92,7 @@ class ServerConfigTests {
     }
 
     @Test
-    @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
+    @Timeout(value = 30, timeUnit = TimeUnit.SECONDS)
     @DisplayName("Test overriding configuration entries")
     fun testGetProperty(vtx: Vertx, tc: VertxTestContext) {
         ServerConfig.load(vertx = vtx,
