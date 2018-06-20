@@ -9,6 +9,7 @@ import io.vertx.core.Future
 import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
+import io.vertx.ext.web.handler.BodyHandler
 import org.apache.logging.log4j.LogManager
 
 class ServerVerticle : AbstractVerticle() {
@@ -29,6 +30,7 @@ class ServerVerticle : AbstractVerticle() {
         val c = CompletableSubject.create()
         val router = Router.router(vertx)
 
+        router.route().handler(BodyHandler.create())
         router.route("/").handler { rc -> rc.response().end("Hello Vert.x from kotlin!") }
         router.get("/authorize")
                 .handler(AuthorizationEndpoint)
@@ -37,7 +39,6 @@ class ServerVerticle : AbstractVerticle() {
                 .handler(ConsentEndpoint)
                 .failureHandler(ErrorHandler)
         router.post("/oauth/token")
-                .consumes("application/json")
                 .handler(TokenEndpoint)
                 .failureHandler(ErrorHandler)
 
