@@ -7,34 +7,21 @@ import io.vertx.core.Handler
 import io.vertx.core.http.HttpServerRequest
 import io.vertx.ext.web.RoutingContext
 import okhttp3.HttpUrl
+import org.apache.logging.log4j.LogManager
 import java.net.URI
 
 object AuthorizationEndpoint : Handler<RoutingContext> {
 
+    private val logger = LogManager.getLogger(AuthorizationEndpoint::class)
+
     override fun handle(rc: RoutingContext) {
         val form = rc.request().toRequestForm()
-        println(form)
+        logger.debug("received form {}", form)
         rc.response()
                 .setStatusCode(HttpResponseStatus.FOUND.code())
-                .putHeader("Location", buildRedirectURL("foobar", "12345678"))
+                .putHeader("Location", RequireConsentResponse("foobar", "12345678")
+                        .buildRedirectURL())
                 .end()
-    }
-
-    private fun buildRedirectURL(token: String, state: String): String {
-        return HttpUrl.Builder().also {
-            val scheme = stringProp("service.oauth.consent.scheme")
-            it.scheme(if (scheme.isBlank()) "https" else scheme)
-
-            val host = stringProp("service.oauth.consent.host")
-            it.host(if (host.isBlank()) "localhost" else host)
-
-            val port = intProp("service.oauth.consent.port")
-            if (port > 0)
-                it.port(port)
-
-            it.addQueryParameter("token", token)
-            it.addQueryParameter("state", state)
-        }.build().toString()
     }
 
     private fun HttpServerRequest.toRequestForm(): AuthorizationForm {
@@ -74,8 +61,8 @@ object AuthorizationEndpoint : Handler<RoutingContext> {
     private const val PARAM_REDIRECT_URI = "redirect_uri"
     private const val PARAM_STATE = "state"
 
-    const val RESPONSE_TYPE_CODE = "code"
-    const val RESPONSE_TYPE_TOKEN = "token"
+    private const val RESPONSE_TYPE_CODE = "code"
+    private const val RESPONSE_TYPE_TOKEN = "token"
 }
 
 data class AuthorizationForm(val responseType: String,
@@ -83,3 +70,24 @@ data class AuthorizationForm(val responseType: String,
                              val scopes: Set<String>,
                              var redirectURI: String,
                              val state: String)
+
+data class RequireConsentResponse(private val token: String,
+                                  private val state: String) {
+
+    fun buildRedirectURL(): String {
+        return HttpUrl.Builder().also {
+            val scheme = stringProp("service.oauth.consent.scheme")
+            it.scheme(if (scheme.isBlank()) "https" else scheme)
+
+            val host = stringProp("service.oauth.consent.host")
+            it.host(if (host.isBlank()) "localhost" else host)
+
+            val port = intProp("service.oauth.consent.port")
+            if (port > 0)
+                it.port(port)
+
+            it.addQueryParameter("token", token)
+            it.addQueryParameter("state", state)
+        }.build().toString()
+    }
+}
