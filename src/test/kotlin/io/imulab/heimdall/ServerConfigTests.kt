@@ -3,11 +3,9 @@ package io.imulab.heimdall
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.junit5.Timeout
-import io.vertx.junit5.VertxExtension
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 

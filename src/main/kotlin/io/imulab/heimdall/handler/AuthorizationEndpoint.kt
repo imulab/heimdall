@@ -12,9 +12,12 @@ import java.net.URI
 
 object AuthorizationEndpoint : Handler<RoutingContext> {
 
-    private val logger = LogManager.getLogger(AuthorizationEndpoint::class)
+    private val logger = LogManager.getLogger(AuthorizationEndpoint::class.java)
 
     override fun handle(rc: RoutingContext) {
+        println(rc.get<String>(DeliveryParameterHandler.FIELD_DELIVERY))
+
+        // save delivery to state, if undefined, default to client's authorizationDelivery
         val form = rc.request().toRequestForm()
         logger.debug("received form {}", form)
         rc.response()
@@ -75,19 +78,11 @@ data class RequireConsentResponse(private val token: String,
                                   private val state: String) {
 
     fun buildRedirectURL(): String {
-        return HttpUrl.Builder().also {
-            val scheme = stringProp("service.oauth.consent.scheme")
-            it.scheme(if (scheme.isBlank()) "https" else scheme)
-
-            val host = stringProp("service.oauth.consent.host")
-            it.host(if (host.isBlank()) "localhost" else host)
-
-            val port = intProp("service.oauth.consent.port")
-            if (port > 0)
-                it.port(port)
-
-            it.addQueryParameter("token", token)
-            it.addQueryParameter("state", state)
-        }.build().toString()
+        return HttpUrl.parse(stringProp("service.oauth.consent.url"))!!
+                .newBuilder()
+                .also {
+                    it.addQueryParameter("token", token)
+                    it.addQueryParameter("state", state)
+                }.build().toString()
     }
 }

@@ -31,13 +31,21 @@ class ServerVerticle : AbstractVerticle() {
         val router = Router.router(vertx)
 
         router.route().handler(BodyHandler.create())
+
         router.route("/").handler { rc -> rc.response().end("Hello Vert.x from kotlin!") }
+
+        router.get("/authorize")
+                .handler(DeliveryParameterHandler.createForAuthorizationEndpoint())
         router.get("/authorize")
                 .handler(AuthorizationEndpoint)
                 .failureHandler(ErrorHandler)
+
         router.get("/consent")
                 .handler(ConsentEndpoint)
                 .failureHandler(ErrorHandler)
+
+        router.post("/oauth/token")
+                .handler(DeliveryParameterHandler.createForTokenEndpoint())
         router.post("/oauth/token")
                 .handler(TokenEndpoint)
                 .failureHandler(ErrorHandler)

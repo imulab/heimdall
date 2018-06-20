@@ -1,38 +1,41 @@
 package io.imulab.heimdall.handler
 
-import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.Handler
 import io.vertx.core.http.HttpServerRequest
+import io.vertx.core.http.HttpServerResponse
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.RoutingContext
 import java.net.URI
+import java.nio.charset.StandardCharsets
 
 object TokenEndpoint : Handler<RoutingContext> {
 
     override fun handle(rc: RoutingContext) {
+        var delivery = rc.get<String>(DeliveryParameterHandler.FIELD_DELIVERY)
+        if (delivery.isBlank())
+            delivery = DeliveryParameterHandler.DELIVERY_JSON
         val form = rc.request().toForm()
+
         when (form) {
-            is TokenByCodeForm -> handle(rc, form)
-            is TokenByCredentialForm -> handle(rc, form)
+            is TokenByCodeForm -> handle(rc, delivery, form)
+            is TokenByCredentialForm -> handle(rc, delivery, form)
             else -> throw IllegalStateException("unsupported token form.")
         }
     }
 
-    private fun handle(rc: RoutingContext, form: TokenByCodeForm) {
+    private fun handle(rc: RoutingContext, delivery: String, form: TokenByCodeForm) {
         val response = TokenResponse(accessToken = "xyz", expiresInSeconds = 3600)
-        rc.response()
-                .putHeader("Content-Type", "application/json; charset=utf-8")
-                .setStatusCode(HttpResponseStatus.OK.code())
-                .end(Json.encodePrettily(response.toJsonObject()))
+        rc.response().also {
+            response.writeResponse(delivery, it)
+        }.end()
     }
 
-    private fun handle(rc: RoutingContext, form: TokenByCredentialForm) {
+    private fun handle(rc: RoutingContext, delivery: String, form: TokenByCredentialForm) {
         val response = TokenResponse(accessToken = "xyz", expiresInSeconds = 3600)
-        rc.response()
-                .putHeader("Content-Type", "application/json; charset=utf-8")
-                .setStatusCode(HttpResponseStatus.OK.code())
-                .end(Json.encodePrettily(response.toJsonObject()))
+        rc.response().also {
+            response.writeResponse(delivery, it)
+        }.end()
     }
 
     private fun HttpServerRequest.toForm(): Any {
@@ -112,6 +115,26 @@ data class TokenResponse(var accessToken: String = "",
                          var idToken: String = "",
                          var refreshToken: String = "",
                          var tokenType: String = "") {
+
+    fun writeResponse(delivery: String, r: HttpServerResponse): HttpServerResponse {
+        val data = toJsonObject()
+        when (delivery) {
+            DeliveryParameterHandler.DELIVERY_FORM -> {
+                val raw = data.joinToString(separator = "&") { "${it.key}=${it.value}" }
+                r.putHeader("Content-Length", raw.toByteArray(StandardCharsets.UTF_8).size.toString())
+                r.putHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
+                r.write(raw)
+            }   
+            DeliveryParameterHandler.DELIVERY_JSON -> {
+                val raw = Json.encodePrettily(data)
+                r.putHeader("Content-Length", raw.toByteArray(StandardCharsets.UTF_8).size.toString())
+                r.putHeader("Content-Type", "application/json; charset=utf-8")
+                r.write(raw)
+            }
+            else -> throw IllegalStateException("invalid delivery '$delivery'.")
+        }
+        return r
+    }
 
     fun toJsonObject(): JsonObject {
         return JsonObject().also {

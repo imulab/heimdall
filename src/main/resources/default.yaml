@@ -5,6 +5,4 @@ service:
     state:
       entropy: 8
     consent:
-      scheme: http
-      host: 127.0.0.1
-      port: 9000
+      url: http://127.0.0.1:9000
