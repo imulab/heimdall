@@ -11,9 +11,10 @@ import io.vertx.core.json.JsonObject
 import java.util.concurrent.atomic.AtomicBoolean
 
 object ServerConfig {
-
-    private var once = AtomicBoolean(false)
+    
+    @Volatile
     private var config: JsonObject = JsonObject()
+    private var once = AtomicBoolean(false)
 
     fun config(): JsonObject = config
 

@@ -124,7 +124,7 @@ data class TokenResponse(var accessToken: String = "",
                 r.putHeader("Content-Length", raw.toByteArray(StandardCharsets.UTF_8).size.toString())
                 r.putHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
                 r.write(raw)
-            }   
+            }
             DeliveryParameterHandler.DELIVERY_JSON -> {
                 val raw = Json.encodePrettily(data)
                 r.putHeader("Content-Length", raw.toByteArray(StandardCharsets.UTF_8).size.toString())
