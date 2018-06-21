@@ -7,10 +7,12 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 
-object ErrorHandler : Handler<RoutingContext> {
+class ErrorHandler : Handler<RoutingContext> {
 
-    private const val FIELD_ERROR = "error"
-    private const val FIELD_ERROR_DESCRIPTION = "error_description"
+    companion object {
+        private const val FIELD_ERROR = "error"
+        private const val FIELD_ERROR_DESCRIPTION = "error_description"
+    }
 
     private val logger = LogManager.getLogger(ErrorHandler::class.java)
 

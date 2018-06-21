@@ -6,7 +6,7 @@ import io.vertx.core.http.HttpServerResponse
 import io.vertx.ext.web.RoutingContext
 import okhttp3.HttpUrl
 
-object ConsentEndpoint : Handler<RoutingContext> {
+class ConsentEndpoint : Handler<RoutingContext> {
 
     override fun handle(rc: RoutingContext) {
         // respect delivery from saved state only

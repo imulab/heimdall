@@ -9,7 +9,7 @@ import io.vertx.ext.web.RoutingContext
 import java.net.URI
 import java.nio.charset.StandardCharsets
 
-object TokenEndpoint : Handler<RoutingContext> {
+class TokenEndpoint : Handler<RoutingContext> {
 
     override fun handle(rc: RoutingContext) {
         var delivery = rc.get<String>(DeliveryParameterHandler.FIELD_DELIVERY)
@@ -92,14 +92,16 @@ object TokenEndpoint : Handler<RoutingContext> {
             else
                 default
 
-    private const val FIELD_GRANT_TYPE = "grant_type"
-    private const val FIELD_CODE = "code"
-    private const val FIELD_CLIENT_ID = "client_id"
-    private const val FIELD_REDIRECT_URI = "redirect_uri"
-    private const val FIELD_SCOPE = "scope"
+    companion object {
+        private const val FIELD_GRANT_TYPE = "grant_type"
+        private const val FIELD_CODE = "code"
+        private const val FIELD_CLIENT_ID = "client_id"
+        private const val FIELD_REDIRECT_URI = "redirect_uri"
+        private const val FIELD_SCOPE = "scope"
 
-    private const val GRANT_TYPE_CODE = "authorization_code"
-    private const val GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials"
+        private const val GRANT_TYPE_CODE = "authorization_code"
+        private const val GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials"
+    }
 }
 
 data class TokenByCodeForm(val grantType: String,

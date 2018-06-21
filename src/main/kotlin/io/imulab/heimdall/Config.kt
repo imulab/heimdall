@@ -54,3 +54,39 @@ object Config {
         }
     }
 }
+
+fun JsonObject.prop(key: String, default: Any? = null): Any {
+    // check for environment variable equivalent
+    val envKey = key.replace(".", "_", true).toUpperCase()
+    if (this.containsKey(envKey))
+        return this.getValue(envKey)
+
+    // get property from period delimited path
+    val segs = key.split(".")
+    var prop: JsonObject = this
+    segs.forEachIndexed { index, s ->
+        if (index == segs.size - 1)
+            return@forEachIndexed
+
+        if (prop.containsKey(s))
+            prop = prop.getJsonObject(s)
+        else {
+            if (default != null)
+                return default
+            else
+                throw InvalidConfigurationException("property not found with key '$key'.")
+        }
+    }
+
+    return if (prop.containsKey(segs.last()))
+        prop.getValue(segs.last())
+    else
+        default ?: throw InvalidConfigurationException("property not found with key '$key'.")
+}
+
+fun JsonObject.string(key: String): String = this.prop(key) as String
+fun JsonObject.string(key: String, default: String): String = this.prop(key, default) as String
+fun JsonObject.int(key: String): Int = this.prop(key) as Int
+fun JsonObject.int(key: String, default: Int): Int = this.prop(key, default) as Int
+
+class InvalidConfigurationException(reason: String) : RuntimeException(reason)

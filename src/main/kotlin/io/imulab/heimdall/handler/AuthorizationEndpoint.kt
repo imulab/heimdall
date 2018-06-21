@@ -1,7 +1,5 @@
 package io.imulab.heimdall.handler
 
-import io.imulab.heimdall.intProp
-import io.imulab.heimdall.stringProp
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.Handler
 import io.vertx.core.http.HttpServerRequest
@@ -10,7 +8,8 @@ import okhttp3.HttpUrl
 import org.apache.logging.log4j.LogManager
 import java.net.URI
 
-object AuthorizationEndpoint : Handler<RoutingContext> {
+class AuthorizationEndpoint(private val minStateEntropy: Int,
+                            private val consentServiceURL: String) : Handler<RoutingContext> {
 
     private val logger = LogManager.getLogger(AuthorizationEndpoint::class.java)
 
@@ -23,7 +22,7 @@ object AuthorizationEndpoint : Handler<RoutingContext> {
         rc.response()
                 .setStatusCode(HttpResponseStatus.FOUND.code())
                 .putHeader("Location", RequireConsentResponse("foobar", "12345678")
-                        .buildRedirectURL())
+                        .buildRedirectURL(consentServiceURL))
                 .end()
     }
 
@@ -51,21 +50,22 @@ object AuthorizationEndpoint : Handler<RoutingContext> {
             }
         }
 
-        val minEntropy = intProp("service.oauth.state.entropy")
-        if (form.state.length < minEntropy)
-            throw InvalidRequestException("weak state entropy, minimum is $minEntropy")
+        if (form.state.length < this@AuthorizationEndpoint.minStateEntropy)
+            throw InvalidRequestException("weak state entropy, minimum is ${this@AuthorizationEndpoint.minStateEntropy}")
 
         return form
     }
 
-    private const val PARAM_RESPONSE_TYPE = "response_type"
-    private const val PARAM_CLIENT_ID = "client_id"
-    private const val PARAM_SCOPE = "scope"
-    private const val PARAM_REDIRECT_URI = "redirect_uri"
-    private const val PARAM_STATE = "state"
+    companion object {
+        private const val PARAM_RESPONSE_TYPE = "response_type"
+        private const val PARAM_CLIENT_ID = "client_id"
+        private const val PARAM_SCOPE = "scope"
+        private const val PARAM_REDIRECT_URI = "redirect_uri"
+        private const val PARAM_STATE = "state"
 
-    private const val RESPONSE_TYPE_CODE = "code"
-    private const val RESPONSE_TYPE_TOKEN = "token"
+        private const val RESPONSE_TYPE_CODE = "code"
+        private const val RESPONSE_TYPE_TOKEN = "token"
+    }
 }
 
 data class AuthorizationForm(val responseType: String,
@@ -77,8 +77,8 @@ data class AuthorizationForm(val responseType: String,
 data class RequireConsentResponse(private val token: String,
                                   private val state: String) {
 
-    fun buildRedirectURL(): String {
-        return HttpUrl.parse(stringProp("service.oauth.consent.url"))!!
+    fun buildRedirectURL(consentServiceURL: String): String {
+        return HttpUrl.parse(consentServiceURL)!!
                 .newBuilder()
                 .also {
                     it.addQueryParameter("token", token)
