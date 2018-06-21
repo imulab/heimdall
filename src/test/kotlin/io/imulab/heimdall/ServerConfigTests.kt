@@ -4,6 +4,7 @@ import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.junit5.Timeout
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
@@ -19,6 +20,7 @@ import java.util.concurrent.locks.ReentrantLock
  *
  * @see ServerConfigTests#withLock()
  */
+@Disabled
 class ServerConfigTests {
 
     private val lock = ReentrantLock()
