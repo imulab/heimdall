@@ -33,20 +33,16 @@ class ServerVerticle : AbstractVerticle() {
 
         router.route("/").handler { rc -> rc.response().end("Hello Vert.x from kotlin!") }
 
-        router.get("/authorize")
-                .handler(components.authEndpointDeliveryParamHandler)
-        router.get("/authorize")
-                .handler(components.authorizeEndpointHandler)
+        router.get("/authorize").handler(components.authEndpointDeliveryParamHandler)
+        router.get("/authorize").handler(components.authorizeEndpointHandler)
                 .failureHandler(components.errorHandler)
 
-        router.get("/consent")
-                .handler(components.consentEndpointHandler)
+        router.get("/consent").handler(components.consentEndpointHandler)
                 .failureHandler(components.errorHandler)
 
-        router.post("/oauth/token")
-                .handler(components.tokenEndpointDeliveryParamHandler)
-        router.post("/oauth/token")
-                .handler(components.tokenEndpointHandler)
+        router.post("/oauth/token").handler(components.clientAuthenticationHandler)
+        router.post("/oauth/token").handler(components.tokenEndpointDeliveryParamHandler)
+        router.post("/oauth/token").handler(components.tokenEndpointHandler)
                 .failureHandler(components.errorHandler)
 
         vertx.createHttpServer(HttpServerOptions())

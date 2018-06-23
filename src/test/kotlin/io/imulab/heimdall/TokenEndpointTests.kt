@@ -23,12 +23,16 @@ class TokenEndpointTests : ServerFunctionTests() {
     @DisplayName("Endpoint should return invalid_request when supplied invalid grant type")
     fun testInvalidGrantType(vtx: Vertx, tc: VertxTestContext) {
         httpFormPost(vtx = vtx, uri = "/oauth/token",
+                basicAuth = Pair("3acf718f-6dd4-4618-b58a-68ffc628f956", "Xtr4vmMYd9lg2rPq"),
                 form = listOf(Pair("grant_type", "foo")),
                 assertStatus = statusShouldBe(400)) {
             val json = JsonObject(it)
-            Assertions.assertThat(json.getString("error")).isEqualTo("invalid_request")
-            Assertions.assertThat(json.getString("error_description")).containsIgnoringCase("grant_type")
-            tc.completeNow()
+            try {
+                Assertions.assertThat(json.getString("error")).isEqualTo("invalid_request")
+                Assertions.assertThat(json.getString("error_description")).containsIgnoringCase("grant_type")
+            } finally {
+                tc.completeNow()
+            }
         }
     }
 }

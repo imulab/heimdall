@@ -8,6 +8,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.URLEncoder
 import java.nio.charset.Charset
+import java.util.*
 
 @ExtendWith(VertxExtension::class)
 abstract class ServerFunctionTests {
@@ -30,6 +31,7 @@ abstract class ServerFunctionTests {
     }
 
     fun httpFormPost(vtx: Vertx, uri: String,
+                     basicAuth: Pair<String, String>? = null,
                      form: List<Pair<String, String>>,
                      assertStatus: (Int) -> Unit = statusShouldBe(200),
                      assertHeaders: (MultiMap) -> Unit = {},
@@ -38,6 +40,12 @@ abstract class ServerFunctionTests {
             assertStatus(r.statusCode())
             assertHeaders(r.headers())
             r.bodyHandler(assertBody)
+        }
+        if (basicAuth != null) {
+            val encoded = "${basicAuth.first}:${basicAuth.second}".let {
+                Base64.getEncoder().encodeToString(it.toByteArray())
+            }
+            req.putHeader("authorization", "Basic $encoded")
         }
         req.putHeader("content-type", "application/x-www-form-urlencoded")
         val body = form.joinToString(separator = "&") { "${it.first}=${it.second}" }.let {

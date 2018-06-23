@@ -1,7 +1,11 @@
 package io.imulab.heimdall
 
 import io.imulab.heimdall.handler.*
+import io.vertx.core.Handler
+import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.handler.BasicAuthHandler
 
 class Components(val config: JsonObject) {
 
@@ -43,4 +47,32 @@ class Components(val config: JsonObject) {
     var serviceConsentURL: String? = null
         private set
         get() = field ?: config.string("service.oauth.consent.url").also { field = it }
+
+    var clientService: ClientService? = null
+        private set
+        get() {
+            if (field == null) {
+                val stockData = config.prop("service.oauth.clients") as JsonArray
+                val stockClients = mutableListOf<Client>()
+                val stockSecrets = mutableMapOf<String, String>()
+
+                stockData.forEach {
+                    it as JsonObject
+                    val id = it.getString("id")
+                    val name = it.getString("name")
+                    stockClients.add(Client(id, name))
+
+                    if (it.containsKey("secret"))
+                        stockSecrets[id] = it.getString("secret")
+                }
+
+                field = StockClientService(stockClients, stockSecrets)
+            }
+
+            return field
+        }
+
+    var clientAuthenticationHandler: ClientAuthenticationHandler? = null
+        private set
+        get() = field ?: ClientAuthenticationHandler(clientService!!, false).also { field = it }
 }
