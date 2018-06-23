@@ -18,14 +18,18 @@ class ClientAuthenticationHandler(private val authProvider: AuthProvider,
             if (parseCred.failed())
                 throw parseCred.cause()
             else {
-                authProvider.authenticate(parseCred.result(), { auth ->
-                    if (auth.failed())
-                        throw auth.cause()
-                    else {
-                        rc.setUser(auth.result())
-                        rc.next()
-                    }
-                })
+                if (!parseCred.result().isEmpty) {
+                    authProvider.authenticate(parseCred.result(), { auth ->
+                        if (auth.failed())
+                            throw auth.cause()
+                        else {
+                            rc.setUser(auth.result())
+                            rc.next()
+                        }
+                    })
+                } else {
+                    rc.next()
+                }
             }
         })
     }
@@ -50,22 +54,18 @@ class ClientAuthenticationHandler(private val authProvider: AuthProvider,
             return
         }
 
-        try {
-            val idx = authorization.indexOf(' ')
-            if (idx <= 0) {
-                headerFailure("malformed authorization header.")
-                return
-            }
-
-            if ("Basic" != authorization.substring(0, idx)) {
-                headerFailure("only Basic authentication is supported.")
-                return
-            }
-
-            handler.handle(Future.succeededFuture(authorization.substring(idx + 1)))
-        } catch (e: RuntimeException) {
-            handler.handle(Future.failedFuture(e))
+        val idx = authorization.indexOf(' ')
+        if (idx <= 0) {
+            headerFailure("malformed authorization header.")
+            return
         }
+
+        if ("Basic" != authorization.substring(0, idx)) {
+            headerFailure("only Basic authentication is supported.")
+            return
+        }
+
+        handler.handle(Future.succeededFuture(authorization.substring(idx + 1)))
     }
 
     private fun parseCredentials(context: RoutingContext, handler: Handler<AsyncResult<JsonObject>>) {
@@ -75,11 +75,16 @@ class ClientAuthenticationHandler(private val authProvider: AuthProvider,
                 return@Handler
             }
 
+            if (parseAuth.result().isBlank()) {
+                handler.handle(Future.succeededFuture(JsonObject()))
+                return@Handler
+            }
+
             val credentials = JsonObject()
             val decoded = try {
                 String(Base64.getDecoder().decode(parseAuth.result()))
-            } catch (e: RuntimeException) {
-                context.fail(e)
+            } catch (e: IllegalArgumentException) {
+                context.fail(ClientAuthenticationFailedException(e.message!!))
                 return@Handler
             }
 

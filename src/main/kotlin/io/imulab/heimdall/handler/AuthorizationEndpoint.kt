@@ -51,7 +51,8 @@ class AuthorizationEndpoint(private val minStateEntropy: Int,
         }
 
         if (form.state.length < this@AuthorizationEndpoint.minStateEntropy)
-            throw InvalidRequestException("weak state entropy, minimum is ${this@AuthorizationEndpoint.minStateEntropy}")
+            throw InvalidRequestException(
+                    "weak state entropy, minimum is ${this@AuthorizationEndpoint.minStateEntropy}")
 
         return form
     }
