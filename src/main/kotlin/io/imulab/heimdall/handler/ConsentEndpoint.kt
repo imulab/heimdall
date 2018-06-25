@@ -5,6 +5,7 @@ import io.vertx.core.Handler
 import io.vertx.core.http.HttpServerResponse
 import io.vertx.ext.web.RoutingContext
 import okhttp3.HttpUrl
+import org.apache.logging.log4j.LogManager
 
 class ConsentEndpoint : Handler<RoutingContext> {
 
@@ -17,6 +18,35 @@ class ConsentEndpoint : Handler<RoutingContext> {
                 .setStatusCode(HttpResponseStatus.FOUND.code())
                 .also { consentResponse.writeResponse(delivery, it) }
                 .end()
+    }
+}
+
+/**
+ * This endpoint handler simulates what a 'Consent App' would do after receiving the consent token from Heimdall.
+ * Note this is a simulation and demo purpose only endpoint. Do not include this in production. The simulation bears
+ * a key difference with a real 'Consent App': this will not actually ask the user for consent; rather, it would just
+ * automatically grant all requested scopes.
+ *
+ * @author Weinan Qiu
+ */
+class ConsentFlowSimulationEndpoint(private val heimdallServiceUrl: String) : Handler<RoutingContext> {
+    override fun handle(rc: RoutingContext) {
+        val token = rc.request().getParam("token")
+        val state = rc.request().getParam("state")
+
+        logger.debug("consent simulation received token {} and state {}", token, state)
+
+        rc.response()
+                .setStatusCode(HttpResponseStatus.FOUND.code())
+                .putHeader("Location", HttpUrl.parse(heimdallServiceUrl)!!.newBuilder().also {
+                    it.addQueryParameter("token", "abcdefg")
+                    it.addQueryParameter("state", state)
+                }.build().toString())
+                .end()
+    }
+
+    companion object {
+        private val logger = LogManager.getLogger(ConsentFlowSimulationEndpoint::class.java)
     }
 }
 

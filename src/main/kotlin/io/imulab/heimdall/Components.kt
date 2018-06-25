@@ -25,6 +25,16 @@ class Components(val config: JsonObject) {
         private set
         get() = field ?: ConsentEndpoint().also { field = it }
 
+    var consentFlowSimulationEndpoint: ConsentFlowSimulationEndpoint? = null
+        private set
+        get() {
+            if (field == null) {
+                val endpoint = "http://localhost:${config.int("service.http.port")}/consent"
+                field = ConsentFlowSimulationEndpoint(endpoint)
+            }
+            return field
+        }
+
     var tokenEndpointHandler: TokenEndpoint? = null
         private set
         get() = field ?: TokenEndpoint().also { field = it }

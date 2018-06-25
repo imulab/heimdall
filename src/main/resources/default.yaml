@@ -5,7 +5,7 @@ service:
     state:
       entropy: 8
     consent:
-      url: http://127.0.0.1:9000
+      url: http://127.0.0.1:8080/fake_consent
     clients:
       - id: 3acf718f-6dd4-4618-b58a-68ffc628f956
         name: service/heimdall

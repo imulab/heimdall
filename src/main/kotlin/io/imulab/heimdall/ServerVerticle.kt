@@ -40,6 +40,9 @@ class ServerVerticle : AbstractVerticle() {
         router.get("/consent").handler(components.consentEndpointHandler)
                 .failureHandler(components.errorHandler)
 
+        router.get("/fake_consent").handler(components.consentFlowSimulationEndpoint)
+                .failureHandler(components.errorHandler)
+
         router.post("/oauth/token").handler(components.clientAuthenticationHandler)
         router.post("/oauth/token").handler(components.tokenEndpointDeliveryParamHandler)
         router.post("/oauth/token").handler(components.tokenEndpointHandler)
