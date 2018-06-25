@@ -11,7 +11,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 
-class AuthorizationEndpointTests : ServerFunctionTests() {
+class AuthorizationEndpointHandlerTests : ServerFunctionTests() {
 
     @BeforeEach
     @DisplayName("Deploy server verticle for tests")

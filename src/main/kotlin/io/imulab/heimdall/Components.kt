@@ -1,6 +1,7 @@
 package io.imulab.heimdall
 
 import io.imulab.heimdall.handler.*
+import io.imulab.heimdall.handler.endpoint.AuthorizationEndpointHandler
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 
@@ -14,9 +15,9 @@ class Components(val config: JsonObject) {
         private set
         get() = field ?: DeliveryParameterHandler.createForTokenEndpoint().also { field = it }
 
-    var authorizeEndpointHandler: AuthorizationEndpoint? = null
+    var authorizeEndpointHandler: AuthorizationEndpointHandler? = null
         private set
-        get() = field ?: AuthorizationEndpoint(
+        get() = field ?: AuthorizationEndpointHandler(
                 minStateEntropy = serviceOAuthStateEntropy!!,
                 consentServiceURL = serviceConsentURL!!
         ).also { field = it }
